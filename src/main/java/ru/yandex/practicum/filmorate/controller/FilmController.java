@@ -1,47 +1,48 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.validation.Marker;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
+@Validated
+@RestController
+@RequestMapping("/films")
 public class FilmController {
     private int generatorId = 1;
     private final Map<Integer, Film> films = new HashMap<>();
 
-    @GetMapping("/films")
-    public List<Film> findAll() {
-        //log.debug("Текущее количество постов: {} ", users.size());
-        return new ArrayList<>(films.values());
+    @GetMapping
+    public Collection<Film> getFilms() {
+        return films.values();
     }
-    @PostMapping(value = "/films")
-    public ResponseEntity<Film> add(@Valid @RequestBody Film film)/* throws InvalidEmailException, UserAlreadyExistException */{
-        /*if(user == null || user.getEmail() == null || user.getEmail().isBlank() || user.getEmail().isEmpty()){
-            throw new InvalidEmailException("Invalid Email");
-        }
-        if(users.containsKey(user.getEmail())) {
-            throw new UserAlreadyExistException("User Already Exist");
-        }*/
-        film.setId(generatorId++);
-        return ResponseEntity.ok(film);
+
+    @PostMapping
+    @Validated({Marker.OnCreate.class})
+    public ResponseEntity<Film> crateFilm(@Valid @RequestBody Film newFilm) {
+        newFilm.setId(generatorId);
+        films.put(generatorId++, newFilm);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newFilm);
     }
-    @PutMapping(value = "/films")
-    public ResponseEntity<Film> update(@Valid @RequestBody Film film) /*throws InvalidEmailException*/ {
-        /*if(user == null || user.getEmail() == null || user.getEmail().isBlank() || user.getEmail().isEmpty()){
-            throw new InvalidEmailException("Invalid Email");
+
+    @PutMapping
+    @Validated({Marker.OnUpdate.class})
+    public ResponseEntity<Film> updateFilm(@Valid @RequestBody Film updateFilm) throws NotFoundException {
+        final int id = updateFilm.getId();
+        if (!films.containsKey(id)) {
+            throw new NotFoundException(String.format("фильма с id = %s нет", id));
         }
-        */
-        films.put(film.getId(),film);
-        return ResponseEntity.ok(film);
+        films.put(id, updateFilm);
+        return ResponseEntity.ok(updateFilm);
     }
 }
