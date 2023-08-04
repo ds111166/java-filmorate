@@ -15,7 +15,7 @@ public class Film {
     @NotNull(message = "название не может быть пустым")
     @NotBlank(message = "название не может быть пустым")
     private String name;
-    @Max(value = 200, message = "описание превышает 200 символов!")
+    @Size(max = 200, message = "длина описания превышает 200 символов!")
     private String description;
     @DateNotEarlier(message = "дата релиза — не раньше 28 декабря 1895 года")
     private LocalDate releaseDate;

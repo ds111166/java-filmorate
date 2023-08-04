@@ -15,8 +15,8 @@ public class User {
     private String name;
     @NonNull
     @NotBlank
-    @NotEmpty(message = "элестроннвй почта не может быть пустой")
-    @Email(message = "элестроннвй почта должна соответствовать принятым правлам")
+    @NotEmpty(message = "элестронная почта не может быть пустой")
+    @Email(message = "элестронная почта должна соответствовать принятым правлам")
     private String email;
 
     @NonNull
@@ -24,6 +24,6 @@ public class User {
     @NotEmpty
     @Pattern(regexp = "\\S+", message = "login не должен содержать прбельных символов")
     private String login;
-    @Past(message = "Дата рождения должна быть ранее текущей")
+    @Past(message = "Дата рождения должна быть ранее текущей даты")
     private LocalDate birthday;
 }

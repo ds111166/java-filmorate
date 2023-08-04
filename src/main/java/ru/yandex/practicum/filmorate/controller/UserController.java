@@ -31,6 +31,10 @@ public class UserController {
     @Validated({Marker.OnCreate.class})
     public ResponseEntity<User> createUser(@Valid @RequestBody User newUser) {
         newUser.setId(generatorId);
+        final String name = newUser.getName();
+        if (name == null || name.isEmpty() || name.isBlank()) {
+            newUser.setName(newUser.getLogin());
+        }
         users.put(generatorId++, newUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
     }
@@ -45,4 +49,6 @@ public class UserController {
         users.put(id, updateUser);
         return ResponseEntity.ok(updateUser);
     }
+
+
 }

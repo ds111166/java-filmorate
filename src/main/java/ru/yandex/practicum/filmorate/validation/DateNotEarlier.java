@@ -13,8 +13,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Constraint(validatedBy = DateNotEarlierValidator.class)
 @Documented
+/**
+ * Аннотация для валидации даты выпуска релиза кина
+ */
 public @interface DateNotEarlier {
-    String message() default "{DateNotEarlier.invalid}";
+    String message() default "{Date.invalid}";
 
     Class<?>[] groups() default {};
 
