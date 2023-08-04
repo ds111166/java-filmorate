@@ -36,6 +36,7 @@ public class UserController {
             newUser.setName(newUser.getLogin());
         }
         users.put(generatorId++, newUser);
+        log.info("добавлен - {}!", newUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
     }
 
@@ -47,6 +48,7 @@ public class UserController {
             throw new NotFoundException(String.format("пользователя с id = %s не существует", id));
         }
         users.put(id, updateUser);
+        log.info("обновлён - {}!", updateUser);
         return ResponseEntity.ok(updateUser);
     }
 

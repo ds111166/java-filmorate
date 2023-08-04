@@ -32,6 +32,7 @@ public class FilmController {
     public ResponseEntity<Film> crateFilm(@Valid @RequestBody Film newFilm) {
         newFilm.setId(generatorId);
         films.put(generatorId++, newFilm);
+        log.info("добавлен - {}!", newFilm);
         return ResponseEntity.status(HttpStatus.CREATED).body(newFilm);
     }
 
@@ -43,6 +44,7 @@ public class FilmController {
             throw new NotFoundException(String.format("фильма с id = %s нет", id));
         }
         films.put(id, updateFilm);
+        log.info("обновлён - {}!", updateFilm);
         return ResponseEntity.ok(updateFilm);
     }
 
