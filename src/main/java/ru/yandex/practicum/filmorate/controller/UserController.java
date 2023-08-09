@@ -10,8 +10,9 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.validation.Marker;
 
 import javax.validation.Valid;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -19,23 +20,24 @@ import java.util.Map;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private int generatorId = 1;
-    private final Map<Integer, User> users = new HashMap<>();
+    private long generatorId = 0;
+    private final Map<Long, User> users = new HashMap<>();
 
     @GetMapping
-    public Collection<User> getUsers() {
-        return users.values();
+    public List<User> getUsers() {
+        return new ArrayList<>(users.values());
     }
 
     @PostMapping
     @Validated({Marker.OnCreate.class})
     public ResponseEntity<User> createUser(@Valid @RequestBody User newUser) {
-        newUser.setId(generatorId);
+        final long id = ++generatorId;
+        newUser.setId(id);
         final String name = newUser.getName();
         if (name == null || name.isEmpty() || name.isBlank()) {
             newUser.setName(newUser.getLogin());
         }
-        users.put(generatorId++, newUser);
+        users.put(newUser.getId(), newUser);
         log.info("добавлен - {}!", newUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
     }
@@ -43,7 +45,7 @@ public class UserController {
     @PutMapping
     @Validated({Marker.OnUpdate.class})
     public ResponseEntity<User> updateUser(@Valid @RequestBody User updateUser) throws NotFoundException {
-        final int id = updateUser.getId();
+        final long id = updateUser.getId();
         if (!users.containsKey(id)) {
             throw new NotFoundException(String.format("пользователя с id = %s не существует", id));
         }

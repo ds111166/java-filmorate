@@ -12,9 +12,9 @@ import java.time.LocalDate;
 public class User {
     @Null(groups = Marker.OnCreate.class)
     @NotNull(groups = Marker.OnUpdate.class)
-    private Integer id;
+    private Long id;
     private String name;
-    @NotEmpty(message = "электронная почта не может быть пустой")
+    @NotBlank(message = "электронная почта не может быть пустой")
     @Email(message = "электронная почта должна соответствовать принятым правлам")
     private String email;
     @NotEmpty

@@ -1,10 +1,10 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -13,7 +13,6 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,7 +38,7 @@ class UserControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         String response = mvcResult.getResponse().getContentAsString();
-        Collection<User> users = objectMapper.readValue(response, new TypeReference<Collection<User>>() {
+        List<User> users = objectMapper.readValue(response, new TypeReference<List<User>>() {
         });
         assertEquals(users.size(), 0, "Неверное количество созданных пользователей!");
         List<User> newUsers = new ArrayList<>();
@@ -76,10 +75,10 @@ class UserControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         response = mvcResult.getResponse().getContentAsString();
-        users = objectMapper.readValue(response, new TypeReference<Collection<User>>() {
+        users = objectMapper.readValue(response, new TypeReference<List<User>>() {
         });
-        final List<Integer> usersIds = users.stream().map(User::getId).collect(Collectors.toList());
-        final List<Integer> newUserIds = newUsers.stream().map(User::getId).collect(Collectors.toList());
+        final List<Long> usersIds = users.stream().map(User::getId).collect(Collectors.toList());
+        final List<Long> newUserIds = newUsers.stream().map(User::getId).collect(Collectors.toList());
         assertEquals(usersIds.size(), newUserIds.size(), "количество созданных пользователей не корректно");
         assertTrue(usersIds.containsAll(newUserIds), "не верный список идентификаторо пользователей");
         //List<MyClass> myObjects = mapper.readValue(jsonInput, mapper.getTypeFactory().constructCollectionType(List.class, MyClass.class));
@@ -148,7 +147,7 @@ class UserControllerTest {
         User newUser = User.builder()
                 .name("User")
                 .email("name@mail.ru")
-                .login("name login 123")
+                .login(" name login 123 ")
                 .birthday(LocalDate.of(1990, 12, 31))
                 .build();
 
@@ -164,7 +163,7 @@ class UserControllerTest {
         User newUser = User.builder()
                 .name("User")
                 .email("name@mail.ru")
-                .login("name login 123")
+                .login("name_login")
                 .birthday(LocalDate.now().plusDays(1))
                 .build();
 
@@ -172,7 +171,6 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newUser)))
                 .andExpect(status().isBadRequest());
-
     }
 
     @Test
@@ -218,7 +216,7 @@ class UserControllerTest {
         final MvcResult mvcResult = resultActions.andReturn();
         String response = mvcResult.getResponse().getContentAsString();
         final User user = objectMapper.readValue(response, User.class);
-        final Integer userId = user.getId();
+        final Long userId = user.getId();
         resultActions.andExpect(jsonPath("$.id").value(userId));
 
         newUser.setId(userId);
@@ -254,10 +252,10 @@ class UserControllerTest {
         final MvcResult mvcResult = resultActions.andReturn();
         String response = mvcResult.getResponse().getContentAsString();
         final User user = objectMapper.readValue(response, User.class);
-        final Integer userId = user.getId();
+        final Long userId = user.getId();
         resultActions.andExpect(jsonPath("$.id").value(userId));
 
-        newUser.setId(9999);
+        newUser.setId(9999L);
         newUser.setName("name user");
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)

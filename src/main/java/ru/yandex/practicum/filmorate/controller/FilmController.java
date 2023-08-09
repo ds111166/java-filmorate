@@ -10,8 +10,9 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.validation.Marker;
 
 import javax.validation.Valid;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -19,19 +20,20 @@ import java.util.Map;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private int generatorId = 1;
-    private final Map<Integer, Film> films = new HashMap<>();
+    private long generatorId = 0;
+    private final Map<Long, Film> films = new HashMap<>();
 
     @GetMapping
-    public Collection<Film> getFilms() {
-        return films.values();
+    public List<Film> getFilms() {
+        return new ArrayList<>(films.values());
     }
 
     @PostMapping
     @Validated({Marker.OnCreate.class})
     public ResponseEntity<Film> crateFilm(@Valid @RequestBody Film newFilm) {
-        newFilm.setId(generatorId);
-        films.put(generatorId++, newFilm);
+        final long id = ++generatorId;
+        newFilm.setId(id);
+        films.put(newFilm.getId(), newFilm);
         log.info("добавлен - {}!", newFilm);
         return ResponseEntity.status(HttpStatus.CREATED).body(newFilm);
     }
@@ -39,7 +41,7 @@ public class FilmController {
     @PutMapping
     @Validated({Marker.OnUpdate.class})
     public ResponseEntity<Film> updateFilm(@Valid @RequestBody Film updateFilm) throws NotFoundException {
-        final int id = updateFilm.getId();
+        final long id = updateFilm.getId();
         if (!films.containsKey(id)) {
             throw new NotFoundException(String.format("фильма с id = %s нет", id));
         }

@@ -1,10 +1,10 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -36,7 +36,7 @@ public class FilmControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON)).andReturn();
         String response = mvcResult.getResponse().getContentAsString();
-        Collection<Film> films = objectMapper.readValue(response, new TypeReference<Collection<Film>>() {
+        List<Film> films = objectMapper.readValue(response, new TypeReference<List<Film>>() {
         });
         assertEquals(films.size(), 0, "Неверное количество созданных фильмов!");
         List<Film> newFilms = new ArrayList<>();
@@ -73,10 +73,10 @@ public class FilmControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         response = mvcResult.getResponse().getContentAsString();
-        films = objectMapper.readValue(response, new TypeReference<Collection<Film>>() {
+        films = objectMapper.readValue(response, new TypeReference<List<Film>>() {
         });
-        final List<Integer> filmsIds = films.stream().map(Film::getId).collect(Collectors.toList());
-        final List<Integer> newFilmIds = newFilms.stream().map(Film::getId).collect(Collectors.toList());
+        final List<Long> filmsIds = films.stream().map(Film::getId).collect(Collectors.toList());
+        final List<Long> newFilmIds = newFilms.stream().map(Film::getId).collect(Collectors.toList());
         assertEquals(filmsIds.size(), newFilmIds.size(), "количество созданных фильмов не корректно");
         assertTrue(filmsIds.containsAll(newFilmIds), "не верный список идентификаторо фильмов");
 
@@ -184,7 +184,7 @@ public class FilmControllerTest {
         final MvcResult mvcResult = resultActions.andReturn();
         String response = mvcResult.getResponse().getContentAsString();
         final Film film = objectMapper.readValue(response, Film.class);
-        final Integer filmId = film.getId();
+        final Long filmId = film.getId();
         resultActions.andExpect(jsonPath("$.id").value(filmId));
 
         newFilm.setId(filmId);
@@ -223,10 +223,10 @@ public class FilmControllerTest {
         final MvcResult mvcResult = resultActions.andReturn();
         String response = mvcResult.getResponse().getContentAsString();
         final Film film = objectMapper.readValue(response, Film.class);
-        final Integer filmId = film.getId();
+        final Long filmId = film.getId();
         resultActions.andExpect(jsonPath("$.id").value(filmId));
 
-        newFilm.setId(999888);
+        newFilm.setId(999888L);
         newFilm.setDescription("film upadate");
         newFilm.setDuration(100);
         newFilm.setReleaseDate(LocalDate.of(1995, 12, 30));
