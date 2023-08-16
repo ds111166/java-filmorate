@@ -40,7 +40,7 @@ public class FilmController {
 
     @PutMapping
     @Validated({Marker.OnUpdate.class})
-    public ResponseEntity<Film> updateFilm(@Valid @RequestBody Film updateFilm) throws NotFoundException {
+    public ResponseEntity<Film> updateFilm(@Valid @RequestBody Film updateFilm) {
         final long id = updateFilm.getId();
         if (!films.containsKey(id)) {
             throw new NotFoundException(String.format("фильма с id = %s нет", id));
