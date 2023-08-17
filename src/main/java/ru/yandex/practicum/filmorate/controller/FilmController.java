@@ -7,6 +7,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.validation.Marker;
 
 import javax.validation.Valid;
@@ -20,34 +22,41 @@ import java.util.Map;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private long generatorId = 0;
-    private final Map<Long, Film> films = new HashMap<>();
+
+    private final FilmService filmService;
+
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<Film> getFilms() {
-        return new ArrayList<>(films.values());
+
+        return filmService.getFilms();
+    }
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public Film getFilmById(@PathVariable("id") Long filmId) {
+        return filmService.getFilmById(filmId);
     }
 
     @PostMapping
     @Validated({Marker.OnCreate.class})
-    public ResponseEntity<Film> crateFilm(@Valid @RequestBody Film newFilm) {
-        final long id = ++generatorId;
-        newFilm.setId(id);
-        films.put(newFilm.getId(), newFilm);
-        log.info("добавлен - {}!", newFilm);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newFilm);
+    @ResponseStatus(HttpStatus.CREATED)
+    public Film crateFilm(@Valid @RequestBody Film newFilm) {
+        final Film film = filmService.crateFilm(newFilm);
+        log.info("добавлен - {}!", film);
+        return film;
     }
 
     @PutMapping
     @Validated({Marker.OnUpdate.class})
-    public ResponseEntity<Film> updateFilm(@Valid @RequestBody Film updateFilm) {
-        final long id = updateFilm.getId();
-        if (!films.containsKey(id)) {
-            throw new NotFoundException(String.format("фильма с id = %s нет", id));
-        }
-        films.put(id, updateFilm);
-        log.info("обновлён - {}!", updateFilm);
-        return ResponseEntity.ok(updateFilm);
+    @ResponseStatus(HttpStatus.OK)
+    public Film updateFilm(@Valid @RequestBody Film updatedFilm) {
+        final Film film = filmService.updateFilm(updatedFilm);
+        log.info("обновлён - {}!", film);
+        return film;
     }
 
 }

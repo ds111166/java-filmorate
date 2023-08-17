@@ -7,9 +7,11 @@ import ru.yandex.practicum.filmorate.validation.Marker;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
-@Builder(toBuilder = true)
+@Builder
 public class Film {
     @Null(groups = Marker.OnCreate.class)
     @NotNull(groups = Marker.OnUpdate.class)
@@ -22,4 +24,5 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "продолжительность фильма должна быть положительной")
     private Integer duration;
+    private final Set<Long> likes = new HashSet<>();
 }

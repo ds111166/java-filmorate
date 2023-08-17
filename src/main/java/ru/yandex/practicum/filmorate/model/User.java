@@ -6,9 +6,11 @@ import ru.yandex.practicum.filmorate.validation.Marker;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
-@Builder(toBuilder = true)
+@Builder
 public class User {
     @Null(groups = Marker.OnCreate.class)
     @NotNull(groups = Marker.OnUpdate.class)
@@ -22,4 +24,5 @@ public class User {
     private String login;
     @Past(message = "Дата рождения должна быть ранее текущей даты")
     private LocalDate birthday;
+    private final Set<Long> friends = new HashSet<>();
 }

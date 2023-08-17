@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class InMemoryFilmStorage implements FilmStorage{
+public class InMemoryFilmStorage implements FilmStorage {
     protected long generatorId;
     protected final Map<Long, Film> films;
 
@@ -22,6 +22,19 @@ public class InMemoryFilmStorage implements FilmStorage{
     @Override
     public List<Film> getFilms() {
         return new ArrayList<>(films.values());
+    }
+
+    @Override
+    public List<Film> getFilmsByTheSpecifiedIds(List<Long> ids) {
+        return null;
+    }
+
+    @Override
+    public Film getFilmById(Long filmId) {
+        if (!films.containsKey(filmId)) {
+            throw new NotFoundException(String.format("фильма с id = %s нет", filmId));
+        }
+        return films.get(filmId);
     }
 
     @Override
