@@ -48,7 +48,7 @@ public class UserController {
 
     @GetMapping("/{id}/friends/common/{otherId}")
     @ResponseStatus(HttpStatus.OK)
-    public List<User> getFriendsCommonForUsers(@PathVariable("id") @Min(1) @NotNull Long id, @PathVariable("otherId") @Min(1) @NotNull long otherId) {
+    public List<User> getMutualFriendsOfUsers(@PathVariable("id") @Min(1) @NotNull Long id, @PathVariable("otherId") @Min(1) @NotNull long otherId) {
         return userService.getMutualFriendsOfUsers(id, otherId);
     }
 
