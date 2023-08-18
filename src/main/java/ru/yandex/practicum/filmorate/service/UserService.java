@@ -1,20 +1,20 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class UserService {
     private final UserStorage userStorage;
+    private final FriendStorage friendStorage;
 
-    public UserService(UserStorage userStorage) {
+    public UserService(UserStorage userStorage, FriendStorage friendStorage) {
         this.userStorage = userStorage;
+        this.friendStorage = friendStorage;
     }
 
     public List<User> getUsers() {
@@ -33,19 +33,21 @@ public class UserService {
         return userStorage.getUserById(userId);
     }
 
-    public void addFriend(Long id, Long friendId) {
-        final User user = userStorage.getUserById(id);
-        final User friendUser = userStorage.getUserById(friendId);
-        user.getFriends().add(friendUser.getId());
+    public void addFriend(Long userId, Long friendId) {
+        friendStorage.addFriend(userId, friendId);
     }
 
-    public void deleteFriend(Long id, Long friendId) {
-        final User user = userStorage.getUserById(id);
-        final User friendUser = userStorage.getUserById(friendId);
-        final Set<Long> friendsUser = user.getFriends();
-        if(!friendsUser.contains(friendId) ){
-            throw new NotFoundException(String.format("пользователь %s не является другом пользователя %s", friendUser, user));
-        }
-        friendsUser.remove(friendUser.getId());
+    public void deleteFriend(Long userId, Long friendId) {
+        friendStorage.deleteFriend(userId, friendId);
+    }
+
+    public List<User> getFriendsForUser(Long userId) {
+        return userStorage
+                .getUsersByTheSpecifiedIds(friendStorage.getIdsFriendsForUser(userId));
+    }
+
+    public List<User> getMutualFriendsOfUsers(Long userId, long otherId) {
+        return userStorage
+                .getUsersByTheSpecifiedIds(friendStorage.getMutualFriendsOfUsers(userId, otherId));
     }
 }

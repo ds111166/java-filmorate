@@ -2,23 +2,20 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
+
     private long generatorId;
     private final Map<Long, User> users;
 
-    public InMemoryUserStorage() {
+    public InMemoryUserStorage(FriendStorage friendStorage) {
         this.generatorId = 0;
         this.users = new HashMap<>();
-
     }
 
     @Override
@@ -27,8 +24,10 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getUsersByTheSpecifiedIds(List<Long> ids) {
-        return null;
+    public List<User> getUsersByTheSpecifiedIds(Set<Long> ids) {
+        return users.values().stream()
+                .filter(user -> ids.contains(user.getId()))
+                .collect(Collectors.toList());
     }
 
     @Override

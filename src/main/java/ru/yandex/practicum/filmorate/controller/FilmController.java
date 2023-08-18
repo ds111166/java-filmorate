@@ -2,20 +2,16 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.validation.Marker;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Validated
@@ -32,13 +28,20 @@ public class FilmController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<Film> getFilms() {
-
         return filmService.getFilms();
     }
+
     @GetMapping("/{id}")
+    @Validated
     @ResponseStatus(HttpStatus.OK)
-    public Film getFilmById(@PathVariable("id") Long filmId) {
+    public Film getFilmById(@PathVariable("id") @Min(1) @NotNull Long filmId) {
         return filmService.getFilmById(filmId);
+    }
+
+    @GetMapping("/popular?count={count}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> getTopPopularFilms(@PathVariable(value = "count", required = false) @Min(0) Integer count) {
+        return filmService.getTopPopularFilms(count);
     }
 
     @PostMapping
@@ -57,6 +60,18 @@ public class FilmController {
         final Film film = filmService.updateFilm(updatedFilm);
         log.info("обновлён - {}!", film);
         return film;
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable("id") @Min(1) @NotNull Long id, @PathVariable("friendId") @Min(1) @NotNull Long userId) {
+        log.info("пользователь с id: {} поставил лайк фильму с  id: {}!", userId, id);
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public void deleteLike(@PathVariable("id") @Min(1) @NotNull Long id, @PathVariable("friendId") @Min(1) @NotNull Long userId) {
+        log.info("пользователь с id: {} удалил лайк фильму с id: {}!", userId, id);
+        filmService.deleteLike(id, userId);
     }
 
 }
