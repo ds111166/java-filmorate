@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.validation.Marker;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -34,13 +33,13 @@ public class FilmController {
     @GetMapping("/{id}")
     @Validated
     @ResponseStatus(HttpStatus.OK)
-    public Film getFilmById(@PathVariable("id") @Min(1) @NotNull Long filmId) {
+    public Film getFilmById(@PathVariable("id") @NotNull Long filmId) {
         return filmService.getFilmById(filmId);
     }
 
-    @GetMapping("/popular?count={count}")
+    @GetMapping("/popular")
     @ResponseStatus(HttpStatus.OK)
-    public List<Film> getTopPopularFilms(@PathVariable(value = "count", required = false) @Min(0) Integer count) {
+    public List<Film> getTopPopularFilms(@RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
         return filmService.getTopPopularFilms(count);
     }
 
@@ -63,13 +62,13 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void addLike(@PathVariable("id") @Min(1) @NotNull Long id, @PathVariable("friendId") @Min(1) @NotNull Long userId) {
+    public void addLike(@PathVariable("id") @NotNull Long id, @PathVariable("userId") @NotNull Long userId) {
         log.info("пользователь с id: {} поставил лайк фильму с  id: {}!", userId, id);
         filmService.addLike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public void deleteLike(@PathVariable("id") @Min(1) @NotNull Long id, @PathVariable("friendId") @Min(1) @NotNull Long userId) {
+    public void deleteLike(@PathVariable("id") @NotNull Long id, @PathVariable("userId") @NotNull Long userId) {
         log.info("пользователь с id: {} удалил лайк фильму с id: {}!", userId, id);
         filmService.deleteLike(id, userId);
     }

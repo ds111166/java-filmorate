@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.validation.Marker;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -36,19 +35,19 @@ public class UserController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public User getUserById(@PathVariable("id") @Min(1) @NotNull Long userId) {
+    public User getUserById(@PathVariable("id") @NotNull Long userId) {
         return userService.getUserById(userId);
     }
 
     @GetMapping("/{id}/friends")
     @ResponseStatus(HttpStatus.OK)
-    public List<User> getFriendsForUser(@PathVariable("id") @Min(1) @NotNull Long id) {
+    public List<User> getFriendsForUser(@PathVariable("id") @NotNull Long id) {
         return userService.getFriendsForUser(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
     @ResponseStatus(HttpStatus.OK)
-    public List<User> getMutualFriendsOfUsers(@PathVariable("id") @Min(1) @NotNull Long id, @PathVariable("otherId") @Min(1) @NotNull long otherId) {
+    public List<User> getMutualFriendsOfUsers(@PathVariable("id") @NotNull Long id, @PathVariable("otherId") @NotNull long otherId) {
         return userService.getMutualFriendsOfUsers(id, otherId);
     }
 
@@ -71,13 +70,13 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable("id") @Min(1) @NotNull Long id, @PathVariable("friendId") @Min(1) @NotNull Long friendId) {
+    public void addFriend(@PathVariable("id") @NotNull Long id, @PathVariable("friendId") @NotNull Long friendId) {
         log.info("пользователи с id: {} и id: {} стали друзьями!", id, friendId);
         userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void deleteFriend(@PathVariable("id") @Min(1) @NotNull Long id, @PathVariable("friendId") @Min(1) @NotNull Long friendId) {
+    public void deleteFriend(@PathVariable("id") @NotNull Long id, @PathVariable("friendId") @NotNull Long friendId) {
         log.info("пользователи с id: {} и id: {} перестали дружить!", id, friendId);
         userService.deleteFriend(id, friendId);
     }

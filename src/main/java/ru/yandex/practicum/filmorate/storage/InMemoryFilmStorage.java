@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
@@ -26,7 +27,9 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getFilmsByTheSpecifiedIds(List<Long> ids) {
-        return null;
+        return films.values().stream()
+                .filter(film -> ids.contains(film.getId()))
+                .collect(Collectors.toList());
     }
 
     @Override
