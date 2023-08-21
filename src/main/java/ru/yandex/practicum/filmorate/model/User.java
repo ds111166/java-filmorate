@@ -17,6 +17,7 @@ public class User {
     @NotBlank(message = "электронная почта не может быть пустой")
     @Email(message = "электронная почта должна соответствовать принятым правлам")
     private String email;
+    @NotNull
     @NotEmpty
     @Pattern(regexp = "\\S+", message = "login не должен содержать пробельных символов")
     private String login;

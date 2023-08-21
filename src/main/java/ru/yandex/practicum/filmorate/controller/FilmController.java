@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -16,13 +17,14 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping("/films")
+@RequiredArgsConstructor
 public class FilmController {
 
     private final FilmService filmService;
 
-    public FilmController(FilmService filmService) {
+    /*public FilmController(FilmService filmService) {
         this.filmService = filmService;
-    }
+    }*/
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
