@@ -14,12 +14,12 @@ public class Film {
     @Null(groups = Marker.OnCreate.class)
     @NotNull(groups = Marker.OnUpdate.class)
     private Long id;
-    @NotBlank(message = "название не может быть пустым")
+    @NotBlank(message = "Название не может быть пустым")
     private String name;
-    @Size(max = 200, message = "длина описания превышает 200 символов!")
+    @Size(max = 200, message = "Длина описания превышает 200 символов!")
     private String description;
-    @DateNotEarlier(message = "дата релиза — не раньше 28 декабря 1895 года")
+    @DateNotEarlier(message = "Дата релиза — не раньше 28 декабря 1895 года")
     private LocalDate releaseDate;
-    @Positive(message = "продолжительность фильма должна быть положительной")
+    @Positive(message = "Продолжительность фильма должна быть положительной")
     private Integer duration;
 }

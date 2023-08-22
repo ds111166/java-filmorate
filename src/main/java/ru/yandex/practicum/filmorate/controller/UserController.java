@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.validation.Marker;
 
 import javax.validation.Valid;
@@ -16,47 +16,55 @@ import java.util.List;
 @Slf4j
 @Validated
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
-    private final FriendStorage friendStorage;
-
-    public UserController(UserService userService, FriendStorage friendStorage) {
-        this.userService = userService;
-        this.friendStorage = friendStorage;
-    }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<User> getUsers() {
-        return userService.getUsers();
+        log.info("Запрос на получение списка всех пользователей");
+        final List<User> users = userService.getUsers();
+        log.info("Отправлен список из {} пользователей", users.size());
+        return users;
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public User getUserById(@PathVariable("id") @NotNull Long userId) {
-        return userService.getUserById(userId);
+        log.info("Запрос на получение пользователя с id: {}", userId);
+        final User userById = userService.getUserById(userId);
+        log.info("Отправлен - {}", userById);
+        return userById;
     }
 
     @GetMapping("/{id}/friends")
     @ResponseStatus(HttpStatus.OK)
     public List<User> getFriendsForUser(@PathVariable("id") @NotNull Long id) {
-        return userService.getFriendsForUser(id);
+        log.info("Запрос на получение друзей пользователя с id: {}", id);
+        final List<User> friendsForUser = userService.getFriendsForUser(id);
+        log.info("Отправлен список друзей из {} пользователй", friendsForUser.size());
+        return friendsForUser;
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
     @ResponseStatus(HttpStatus.OK)
     public List<User> getMutualFriendsOfUsers(@PathVariable("id") @NotNull Long id, @PathVariable("otherId") @NotNull long otherId) {
-        return userService.getMutualFriendsOfUsers(id, otherId);
+        log.info("Запрос на получение общих друзей пользователей с id: {} и {}", id, otherId);
+        final List<User> mutualFriendsOfUsers = userService.getMutualFriendsOfUsers(id, otherId);
+        log.info("Отправлен список друзей из {} пользователй", mutualFriendsOfUsers.size());
+        return mutualFriendsOfUsers;
     }
 
     @PostMapping
     @Validated({Marker.OnCreate.class})
     @ResponseStatus(HttpStatus.CREATED)
     public User createUser(@Valid @RequestBody User newUser) {
+        log.info("Запрос на создание - {}", newUser);
         final User user = userService.createUser(newUser);
-        log.info("добавлен - {}!", user);
+        log.info("Создан - {}", user);
         return user;
     }
 
@@ -64,20 +72,23 @@ public class UserController {
     @Validated({Marker.OnUpdate.class})
     @ResponseStatus(HttpStatus.OK)
     public User updateUser(@Valid @RequestBody User updatedUser) {
+        log.info("Запрос на обновление - {}", updatedUser);
         final User user = userService.updateUser(updatedUser);
-        log.info("обновлён - {}!", user);
+        log.info("Обновлён - {}", user);
         return user;
     }
 
     @PutMapping("/{id}/friends/{friendId}")
     public void addFriend(@PathVariable("id") @NotNull Long id, @PathVariable("friendId") @NotNull Long friendId) {
-        log.info("пользователи с id: {} и id: {} стали друзьями!", id, friendId);
+        log.info("Запрос на дружбу пользователей с id: {} и {}", id, friendId);
         userService.addFriend(id, friendId);
+        log.info("Пользователи с id: {} и id: {} стали друзьями", id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFriend(@PathVariable("id") @NotNull Long id, @PathVariable("friendId") @NotNull Long friendId) {
-        log.info("пользователи с id: {} и id: {} перестали дружить!", id, friendId);
+        log.info("Запрос на удаление дружбы пользователей с id: {} и {}", id, friendId);
         userService.deleteFriend(id, friendId);
+        log.info("Пользователи с id: {} и id: {} перестали дружить", id, friendId);
     }
 }

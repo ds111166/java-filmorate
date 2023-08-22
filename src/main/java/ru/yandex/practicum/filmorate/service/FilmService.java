@@ -21,12 +21,6 @@ public class FilmService {
     private final UserStorage userStorage;
     private final LikeStorage likeStorage;
 
-    /*public FilmService(FilmStorage filmStorage, LikeStorage likeStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.likeStorage = likeStorage;
-        this.userStorage = userStorage;
-    }*/
-
     public List<Film> getFilms() {
         return filmStorage.getFilms();
     }

@@ -22,35 +22,41 @@ public class FilmController {
 
     private final FilmService filmService;
 
-    /*public FilmController(FilmService filmService) {
-        this.filmService = filmService;
-    }*/
-
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<Film> getFilms() {
-        return filmService.getFilms();
+        log.info("Запрос на получение списка всех фильмов");
+        final List<Film> films = filmService.getFilms();
+        log.info("Отправлен список из {} фильмов", films.size());
+        return films;
     }
 
     @GetMapping("/{id}")
     @Validated
     @ResponseStatus(HttpStatus.OK)
     public Film getFilmById(@PathVariable("id") @NotNull Long filmId) {
-        return filmService.getFilmById(filmId);
+        log.info("Запрос на получение фильма с id: {}", filmId);
+        final Film filmById = filmService.getFilmById(filmId);
+        log.info("Отправлен - {}", filmById);
+        return filmById;
     }
 
     @GetMapping("/popular")
     @ResponseStatus(HttpStatus.OK)
     public List<Film> getTopPopularFilms(@RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
-        return filmService.getTopPopularFilms(count);
+        log.info("Запрос на получение {} популярных фильмов", count);
+        final List<Film> topPopularFilms = filmService.getTopPopularFilms(count);
+        log.info("Отправлен список из {} популярных фильмов", topPopularFilms.size());
+        return topPopularFilms;
     }
 
     @PostMapping
     @Validated({Marker.OnCreate.class})
     @ResponseStatus(HttpStatus.CREATED)
     public Film crateFilm(@Valid @RequestBody Film newFilm) {
+        log.info("Запрос на создание - {}", newFilm);
         final Film film = filmService.crateFilm(newFilm);
-        log.info("добавлен - {}!", film);
+        log.info("Создан - {}", film);
         return film;
     }
 
@@ -58,21 +64,24 @@ public class FilmController {
     @Validated({Marker.OnUpdate.class})
     @ResponseStatus(HttpStatus.OK)
     public Film updateFilm(@Valid @RequestBody Film updatedFilm) {
+        log.info("Запрос на обновление - {}", updatedFilm);
         final Film film = filmService.updateFilm(updatedFilm);
-        log.info("обновлён - {}!", film);
+        log.info("Обновлён - {}", film);
         return film;
     }
 
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable("id") @NotNull Long id, @PathVariable("userId") @NotNull Long userId) {
-        log.info("пользователь с id: {} поставил лайк фильму с  id: {}!", userId, id);
+        log.info("Запрос на простановку лайка от пользователя с id: {} фильму с id: {}", userId, id);
         filmService.addLike(id, userId);
+        log.info("Пользователь с id: {} поставил лайк фильму с  id: {}", userId, id);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable("id") @NotNull Long id, @PathVariable("userId") @NotNull Long userId) {
-        log.info("пользователь с id: {} удалил лайк фильму с id: {}!", userId, id);
+        log.info("Запрос на удаления лайка от пользователя с id: {} фильму с id: {}", userId, id);
         filmService.deleteLike(id, userId);
+        log.info("Пользователь с id: {} удалил лайк фильму с id: {}", userId, id);
     }
 
 }

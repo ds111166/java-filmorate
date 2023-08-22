@@ -13,7 +13,7 @@ public class InMemoryUserStorage implements UserStorage {
     private long generatorId;
     private final Map<Long, User> users;
 
-    public InMemoryUserStorage(FriendStorage friendStorage) {
+    public InMemoryUserStorage() {
         this.generatorId = 0;
         this.users = new HashMap<>();
     }
@@ -33,7 +33,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User getUserById(Long userId) {
         if (!users.containsKey(userId)) {
-            throw new NotFoundException(String.format("пользователя с id = %s не существует", userId));
+            throw new NotFoundException(String.format("Пользователя с id = %s не существует", userId));
         }
         return users.get(userId);
     }
@@ -54,7 +54,7 @@ public class InMemoryUserStorage implements UserStorage {
     public User updateUser(User updatedUser) {
         final long id = updatedUser.getId();
         if (!users.containsKey(id)) {
-            throw new NotFoundException(String.format("пользователя с id = %s не существует", id));
+            throw new NotFoundException(String.format("Пользователя с id = %s не существует", id));
         }
         users.put(id, updatedUser);
         return updatedUser;

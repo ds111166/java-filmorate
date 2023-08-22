@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Like;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Component
@@ -11,7 +12,7 @@ public class InMemoryLikeStorage implements LikeStorage {
     private final Set<Like> likes;
 
     public InMemoryLikeStorage(Set<Like> likes) {
-        this.likes = likes;
+        this.likes = new HashSet<>();
     }
 
     @Override

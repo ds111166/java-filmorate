@@ -14,8 +14,8 @@ public class User {
     @NotNull(groups = Marker.OnUpdate.class)
     private Long id;
     private String name;
-    @NotBlank(message = "электронная почта не может быть пустой")
-    @Email(message = "электронная почта должна соответствовать принятым правлам")
+    @NotBlank(message = "Электронная почта не может быть пустой")
+    @Email(message = "Электронная почта должна соответствовать принятым правлам")
     private String email;
     @NotNull
     @NotEmpty
