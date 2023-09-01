@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Friendship;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -33,12 +34,14 @@ public class UserService {
     public void addFriend(Long userId, Long friendId) {
         userStorage.getUserById(userId);
         userStorage.getUserById(friendId);
+        final Friendship friendship = Friendship.builder().userId(userId).friendId(friendId).build();
         friendStorage.addFriend(userId, friendId);
     }
 
     public void deleteFriend(Long userId, Long friendId) {
         userStorage.getUserById(userId);
         userStorage.getUserById(friendId);
+        final Friendship friendship = Friendship.builder().userId(userId).friendId(friendId).build();
         friendStorage.deleteFriend(userId, friendId);
     }
 

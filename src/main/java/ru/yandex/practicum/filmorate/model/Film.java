@@ -7,6 +7,8 @@ import ru.yandex.practicum.filmorate.validation.Marker;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -22,4 +24,10 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма должна быть положительной")
     private Integer duration;
+    private Mpa mpa;
+    private List<Genre> genres = new ArrayList<>();
+    /*
+    При создании и получении фильмов передать список идентификаторов жанров и идентификатор рейтинга.
+    Эти же данные должны передаваться при обновлении, создании и получении фильмов — обновить эти эндпоинты.
+     */
 }

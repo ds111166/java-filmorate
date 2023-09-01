@@ -5,8 +5,8 @@ import lombok.Data;
 
 @Data
 @Builder
-public class Friendship {
-    private long userId;
-    private long friendId;
-    private long difference;
+public class FilmGenre {
+    private Long id;
+    private long filmId;
+    private int genreId;
 }
