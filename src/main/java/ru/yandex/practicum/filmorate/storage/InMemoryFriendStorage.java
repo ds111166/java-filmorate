@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Component
+@Component("inMemoryFriendStorage")
 public class InMemoryFriendStorage implements FriendStorage {
 
     private final Map<Friendship, Long> friendships;

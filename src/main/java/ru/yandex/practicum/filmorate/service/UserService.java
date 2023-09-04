@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Friendship;
 import ru.yandex.practicum.filmorate.model.User;
@@ -12,8 +13,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final UserStorage userStorage;
-    private final FriendStorage friendStorage;
+
+    @Qualifier("inMemoryUserStorage") private final UserStorage userStorage;
+    @Qualifier("inMemoryFriendStorage") private final FriendStorage friendStorage;
 
     public List<User> getUsers() {
         return userStorage.getUsers();

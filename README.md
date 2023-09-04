@@ -8,3 +8,5 @@ Template repository for Filmorate project.
 5. Сконфигурировал базу данных для рабочего режима с помощью файла настроек application.properties
 6. добавил скрипты создания БД в shema.sql, сверил структуру с классами
 7. добавил скрипты заполнения справочников жанров и рейтигов а data.sql
+8. создал UserDbStorage, FilmDbStorage, LikeDbStorage, FriendDbStorage (# lombok.copyableAnnotations += org.springframework.beans.factory.annotation.Qualifier)
+9. add in lombok.config "lombok.copyableAnnotations += org.springframework.beans.factory.annotation.Qualifier" для автоматического копирования анотации в конструктор
