@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class FilmGenre {
-    private Long id;
+    //private Long id;
     private long filmId;
     private int genreId;
 }

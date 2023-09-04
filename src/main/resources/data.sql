@@ -1,4 +1,4 @@
-insert into mpa (id, name) values (1, 'G') /*where not exists (select * from mpa where id=1and name='G')*/;
+insert into mpa (id, name) values (1, 'G');
 insert into mpa (id, name) values (2, 'PG');
 insert into mpa (id, name) values (3, 'PG-13');
 insert into mpa (id, name) values (3, 'R');
