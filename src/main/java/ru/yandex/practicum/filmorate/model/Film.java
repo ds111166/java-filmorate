@@ -25,6 +25,7 @@ public class Film {
     @Positive(message = "Продолжительность фильма должна быть положительной")
     private Integer duration;
     private Integer mpaId;
+    @Builder.Default
     private List<Integer> genreIds = new ArrayList<>();
     /*
     Из ТЗ: getFilmGenreIdsByFilmId - получить идентификаторы жанров фильма по идентификатору  фильма
