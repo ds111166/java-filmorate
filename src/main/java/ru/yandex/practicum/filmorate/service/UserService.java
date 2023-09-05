@@ -14,8 +14,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 
-    @Qualifier("inMemoryUserStorage") private final UserStorage userStorage;
-    @Qualifier("inMemoryFriendStorage") private final FriendStorage friendStorage;
+    @Qualifier("inMemoryUserStorage")
+    private final UserStorage userStorage;
+    @Qualifier("inMemoryFriendStorage")
+    private final FriendStorage friendStorage;
 
     public List<User> getUsers() {
         return userStorage.getUsers();

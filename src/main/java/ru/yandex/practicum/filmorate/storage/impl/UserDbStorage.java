@@ -1,24 +1,21 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.sql.Types;
-import java.util.Arrays;
+import java.sql.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -29,30 +26,32 @@ public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
     @Override
     public List<User> getUsers() {
-        return jdbcTemplate.query("SELECT * FROM users;",
-                (rs, rowNum) -> makeUser(rs));
+        final String sql = "SELECT * FROM users;";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs));
     }
 
     @Override
     @Transactional
     public User createUser(User newUser) {
-        final PreparedStatementCreatorFactory pscf =
-                new PreparedStatementCreatorFactory(
-                        "INSERT INTO users (login, \"name\", email, birthday)\n" +
-                                "VALUES(?, ?, ?, ?);",
-                        Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.DATE);
-        pscf.setReturnGeneratedKeys(true);
-        final PreparedStatementCreator psc =
-                pscf.newPreparedStatementCreator(
-                        Arrays.asList(
-                                newUser.getLogin(),
-                                newUser.getName(),
-                                newUser.getEmail(),
-                                newUser.getBirthday()));
+        final String sql = "INSERT INTO users (login, \"name\", email, birthday)\n" +
+                "VALUES(?, ?, ?, ?);";
         final KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(psc, keyHolder);
+        final PreparedStatementCreator preparedStatementCreator = new PreparedStatementCreator() {
+            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+                final PreparedStatement ps =
+                        connection.prepareStatement(sql, new String[]{"id"});
+                ps.setString(1, newUser.getLogin());
+                ps.setString(2, newUser.getName());
+                ps.setString(3, newUser.getEmail());
+                ps.setDate(4, Date.valueOf(newUser.getBirthday()));
+                return ps;
+            }
+        };
+
+        jdbcTemplate.update(preparedStatementCreator, keyHolder);
         final long userId = Objects.requireNonNull(keyHolder.getKey()).longValue();
         newUser.setId(userId);
         return newUser;
@@ -61,27 +60,25 @@ public class UserDbStorage implements UserStorage {
     @Override
     @Transactional
     public User updateUser(User updatedUser) {
-        String sql = "UPDATE users SET login=?, \"name\"=?, email=?, birthday=? WHERE id=?;";
-        jdbcTemplate.update(sql, updatedUser.getLogin(), updatedUser.getName(),
+        final String sql = "UPDATE users SET login=?, \"name\"=?, email=?, birthday=? WHERE id=?;";
+        int numberOfRecordsAffected = jdbcTemplate.update(sql, updatedUser.getLogin(), updatedUser.getName(),
                 updatedUser.getEmail(), updatedUser.getBirthday(), updatedUser.getId());
+        if (numberOfRecordsAffected == 0) {
+            throw new NotFoundException(String.format("Пользователя с id = %s не существует", updatedUser.getId()));
+        }
         return updatedUser;
     }
 
     @Override
     @Transactional
     public User getUserById(Long userId) {
-        final SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet("SELECT * FROM users WHERE id = ?;", userId);
-        if(sqlRowSet.next()){
-            return User.builder()
-                    .id(sqlRowSet.getLong("id"))
-                    .login(sqlRowSet.getString("login"))
-                    .name(sqlRowSet.getString("name"))
-                    .email(sqlRowSet.getString("email"))
-                    .birthday(Objects.requireNonNull(sqlRowSet.getDate("birthday")).toLocalDate()).build();
-        } else {
+        final String sql = "SELECT * FROM users WHERE id = ?;";
+        try {
+            return jdbcTemplate.queryForObject(sql, new Object[]{userId},
+                    new int[]{Types.BIGINT}, (rs, rowNum) -> makeUser(rs));
+        } catch (EmptyResultDataAccessException ex) {
             throw new NotFoundException(String.format("Пользователя с id = %s не существует", userId));
         }
-
     }
 
     @Override
@@ -93,7 +90,7 @@ public class UserDbStorage implements UserStorage {
         return namedParameterJdbcTemplate.query(sql, parameters, (rs, rowNum) -> makeUser(rs));
     }
 
-    private User makeUser( ResultSet rs) throws SQLException {
+    private User makeUser(ResultSet rs) throws SQLException {
         return User.builder()
                 .id(rs.getLong("id"))
                 .login(rs.getString("login"))

@@ -24,9 +24,10 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма должна быть положительной")
     private Integer duration;
-    private Mpa mpa;
-    private List<Genre> genres = new ArrayList<>();
+    private Integer mpaId;
+    private List<Integer> genreIds = new ArrayList<>();
     /*
+    Из ТЗ: getFilmGenreIdsByFilmId - получить идентификаторы жанров фильма по идентификатору  фильма
     При создании и получении фильмов передать список идентификаторов жанров и идентификатор рейтинга.
     Эти же данные должны передаваться при обновлении, создании и получении фильмов — обновить эти эндпоинты.
      */
