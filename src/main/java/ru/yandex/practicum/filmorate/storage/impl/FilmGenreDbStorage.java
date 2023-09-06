@@ -47,7 +47,7 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
         final SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("genreIds", genreIds)
                 .addValue("filmId", filmId, Types.BIGINT);
-        String sql = "DELETE FROM film_genre WHERE film_id = :filmId AND genre_id IN (:genreIds);";
+        final String sql = "DELETE FROM film_genre WHERE film_id = :filmId AND genre_id IN (:genreIds);";
         namedParameterJdbcTemplate.update(sql, parameters);
     }
 

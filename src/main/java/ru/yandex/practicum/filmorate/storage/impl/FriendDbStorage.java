@@ -22,11 +22,11 @@ public class FriendDbStorage implements FriendStorage {
     @Override
     @Transactional
     public void addFriend(long userId, long friendId) {
-        String sqlSelect = "SELECT * FROM friendships where user_id = ? and friend_id = ?;";
-        String sqlUpdate = "UPDATE friendships SET difference=? WHERE user_id=? AND friend_id=?;";
-        String sqlInsert = "INSERT INTO friendships (user_id, friend_id, difference) VALUES(?, ?, ?);";
+        final String sqlSelect = "SELECT * FROM friendships where user_id = ? and friend_id = ?;";
+        final String sqlUpdate = "UPDATE friendships SET difference=? WHERE user_id=? AND friend_id=?;";
+        final String sqlInsert = "INSERT INTO friendships (user_id, friend_id, difference) VALUES(?, ?, ?);";
         final long difference = userId - friendId;
-        Friendship pair2to1 = jdbcTemplate.queryForObject(sqlSelect, new Object[]{friendId, userId},
+        final Friendship pair2to1 = jdbcTemplate.queryForObject(sqlSelect, new Object[]{friendId, userId},
                 new int[]{Types.BIGINT, Types.BIGINT}, (rs, rowNum) -> makeFriendship(rs));
         if (pair2to1 != null) {
             jdbcTemplate.update(sqlUpdate,
@@ -44,13 +44,13 @@ public class FriendDbStorage implements FriendStorage {
     @Override
     @Transactional
     public void deleteFriend(long userId, long friendId) {
-        String sqlSelect = "SELECT * FROM friendships where user_id = ? and friend_id = ?;";
-        String sqlUpdate = "UPDATE friendships SET difference=? WHERE user_id=? AND friend_id=?;";
-        String sqlDelete = "DELETE FROM friendships where user_id = ? and friend_id = ?;";
+        final String sqlSelect = "SELECT * FROM friendships where user_id = ? and friend_id = ?;";
+        final String sqlUpdate = "UPDATE friendships SET difference=? WHERE user_id=? AND friend_id=?;";
+        final String sqlDelete = "DELETE FROM friendships where user_id = ? and friend_id = ?;";
         final long difference = userId - friendId;
-        Friendship pair1to2 = jdbcTemplate.queryForObject(sqlSelect, new Object[]{userId, friendId},
+        final Friendship pair1to2 = jdbcTemplate.queryForObject(sqlSelect, new Object[]{userId, friendId},
                 new int[]{Types.BIGINT, Types.BIGINT}, (rs, rowNum) -> makeFriendship(rs));
-        Friendship pair2to1 = jdbcTemplate.queryForObject(sqlSelect, new Object[]{friendId, userId},
+        final Friendship pair2to1 = jdbcTemplate.queryForObject(sqlSelect, new Object[]{friendId, userId},
                 new int[]{Types.BIGINT, Types.BIGINT}, (rs, rowNum) -> makeFriendship(rs));
         final boolean is1to2 = pair1to2 != null;
         final boolean is2to1 = pair2to1 != null;
@@ -80,7 +80,7 @@ public class FriendDbStorage implements FriendStorage {
     @Override
     @Transactional
     public Set<Long> getIdsFriendsForUser(long userId) {
-        String sql = "SELECT user_id FROM friendships where difference = 0 and friend_id = ?\n" +
+        final String sql = "SELECT user_id FROM friendships where difference = 0 and friend_id = ?\n" +
                 "union\n" +
                 "SELECT friend_id FROM friendships where user_id = ?;";
         return new HashSet<>(jdbcTemplate.queryForList(sql,
@@ -92,7 +92,7 @@ public class FriendDbStorage implements FriendStorage {
     @Override
     @Transactional
     public Set<Long> getMutualFriendsOfUsers(long userId, long otherId) {
-        String sql = "(SELECT user_id FROM friendships where difference = 0 and friend_id = ?\n" +
+        final String sql = "(SELECT user_id FROM friendships where difference = 0 and friend_id = ?\n" +
                 "union \n" +
                 "SELECT friend_id FROM friendships where user_id = ?)\n" +
                 "intersect\n" +

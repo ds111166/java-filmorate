@@ -24,7 +24,7 @@ Template repository for Filmorate project.
 11. сделан интерфейс FilmGenreStorage
 12. сделан FilmGenreDbStorage(возможны изменения)
 13. сделан FilmDbStorage
-14. ДОБАВИТЬ эндпоинт для получение жанров GET /genre, GET /genres/{id}  - контроллер, сервер, стораге
-15. ДОБАВИТЬ эндпоинт для получение рейтингов GET /mpa, GET /mpa/{id} - контроллер, сервер, стораге
+14. сделаны эндпоинт для получение жанров GET /genre, GET /genres/{id}  - контроллер, сервер, стораге
+15. сделаны эндпоинт для получение рейтингов GET /mpa, GET /mpa/{id} - контроллер, сервер, стораге
 16. сделано FriendDbStorage
 17. сделано LikeDbStorage

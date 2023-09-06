@@ -23,7 +23,7 @@ public class LikeDbStorage implements LikeStorage {
     @Override
     @Transactional
     public void addLike(Long filmId, Long userId) {
-        String sql = "INSERT INTO likes (film_id, user_id) VALUES(?, ?);";
+        final String sql = "INSERT INTO likes (film_id, user_id) VALUES(?, ?);";
         try {
             jdbcTemplate.update(sql, filmId, userId);
         } catch (DuplicateKeyException ignored) {
@@ -33,14 +33,14 @@ public class LikeDbStorage implements LikeStorage {
     @Override
     @Transactional
     public void deleteLike(Long filmId, Long userId) {
-        String sql = "DELETE FROM likes WHERE film_id=? AND user_id=?;";
+        final String sql = "DELETE FROM likes WHERE film_id=? AND user_id=?;";
         jdbcTemplate.update(sql, filmId, userId);
     }
 
     @Override
     @Transactional
     public Set<Like> getLikes() {
-        String sql = "SELECT film_id, user_id FROM likes;";
+        final String sql = "SELECT film_id, user_id FROM likes;";
         return new HashSet<>(jdbcTemplate.query(sql, (rs, rowNum) -> makeLike(rs)));
     }
 
