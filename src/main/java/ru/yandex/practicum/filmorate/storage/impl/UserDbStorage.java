@@ -28,6 +28,7 @@ public class UserDbStorage implements UserStorage {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
+    @Transactional
     public List<User> getUsers() {
         final String sql = "SELECT * FROM users;";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs));
@@ -39,16 +40,14 @@ public class UserDbStorage implements UserStorage {
         final String sql = "INSERT INTO users (login, \"name\", email, birthday)\n" +
                 "VALUES(?, ?, ?, ?);";
         final KeyHolder keyHolder = new GeneratedKeyHolder();
-        final PreparedStatementCreator preparedStatementCreator = new PreparedStatementCreator() {
-            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                final PreparedStatement ps =
-                        connection.prepareStatement(sql, new String[]{"id"});
-                ps.setString(1, newUser.getLogin());
-                ps.setString(2, newUser.getName());
-                ps.setString(3, newUser.getEmail());
-                ps.setDate(4, Date.valueOf(newUser.getBirthday()));
-                return ps;
-            }
+        final PreparedStatementCreator preparedStatementCreator = connection -> {
+            final PreparedStatement ps =
+                    connection.prepareStatement(sql, new String[]{"id"});
+            ps.setString(1, newUser.getLogin());
+            ps.setString(2, newUser.getName());
+            ps.setString(3, newUser.getEmail());
+            ps.setDate(4, Date.valueOf(newUser.getBirthday()));
+            return ps;
         };
 
         jdbcTemplate.update(preparedStatementCreator, keyHolder);
@@ -74,8 +73,12 @@ public class UserDbStorage implements UserStorage {
     public User getUserById(Long userId) {
         final String sql = "SELECT * FROM users WHERE id = ?;";
         try {
-            return jdbcTemplate.queryForObject(sql, new Object[]{userId},
+            User user = jdbcTemplate.queryForObject(sql, new Object[]{userId},
                     new int[]{Types.BIGINT}, (rs, rowNum) -> makeUser(rs));
+            if (user == null) {
+                throw new NotFoundException(String.format("Пользователя с id = %s не существует", userId));
+            }
+            return user;
         } catch (EmptyResultDataAccessException ex) {
             throw new NotFoundException(String.format("Пользователя с id = %s не существует", userId));
         }

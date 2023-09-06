@@ -1,15 +1,25 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
+import java.util.Objects;
 
 @Component("filmDbStorage")
 @RequiredArgsConstructor
@@ -17,58 +27,95 @@ public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    @Qualifier("filmGenreDbStorage")
+    private final FilmGenreStorage filmGenreStorage;
 
     @Override
+    @Transactional
     public List<Film> getFilms() {
-        //final String sql = "SELECT id, \"name\", description, release_date, duration, mpa_id FROM films;";
-        /*final String sql = "SELECT fi.id, fi.\"name\", fi.description, fi.release_date," +
-                " fi.duration, fi.mpa_id, fg.genre_id AS genre_id FROM films fi\n" +
-                "LEFT JOIN film_genre fg ON fg.film_id = fi.id;";*/
-        /*final String sql = "SELECT fi.id, fi.\"name\", fi.description, fi.release_date, fi.duration, fi.mpa_id, \n" +
-                "(SELECT string_agg(cast(fg.genre_id AS text), ',')" +
-                " FROM film_genre fg WHERE fg.film_id = fi.id) AS genre_ids\n" +
-                "FROM films fi;";*/
         final String sql = "SELECT id, \"name\", description, release_date, duration, mpa_id FROM films;";
         final List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs));
-
+        films.forEach(film -> film.setGenreIds(filmGenreStorage.getFilmGenreIdsByFilmId(film.getId())));
         return films;
     }
 
     @Override
+    @Transactional
     public Film crateFilm(Film newFilm) {
-        return null;
+        final String sql = "INSERT INTO films\n" +
+                "(\"name\", description, release_date, duration, mpa_id)\n" +
+                "VALUES(?, ?, ?, ?, ?";
+        final KeyHolder keyHolder = new GeneratedKeyHolder();
+        final PreparedStatementCreator preparedStatementCreator = connection -> {
+            final PreparedStatement ps =
+                    connection.prepareStatement(sql, new String[]{"id"});
+            ps.setString(1, newFilm.getName());
+            ps.setString(2, newFilm.getDescription());
+            ps.setDate(3, Date.valueOf(newFilm.getReleaseDate()));
+            ps.setInt(4, newFilm.getDuration());
+            ps.setInt(5, newFilm.getMpaId());
+            return ps;
+        };
+        jdbcTemplate.update(preparedStatementCreator, keyHolder);
+        final long filmId = Objects.requireNonNull(keyHolder.getKey()).longValue();
+        newFilm.setId(filmId);
+        final List<Integer> genreIds = newFilm.getGenreIds();
+        filmGenreStorage.createFilmGenre(filmId, genreIds);
+        return newFilm;
     }
 
     @Override
+    @Transactional
     public Film updateFilm(Film updatedFilm) {
-        return null;
+        final String sql = "UPDATE films \n" +
+                "SET \"name\"=?, description=?, release_date=?, duration=?, mpa_id=?\n" +
+                "WHERE id=?;";
+        final Long filmId = updatedFilm.getId();
+        int numberOfRecordsAffected = jdbcTemplate.update(sql, updatedFilm.getName(), updatedFilm.getDescription(),
+                updatedFilm.getReleaseDate(), updatedFilm.getDuration(), updatedFilm.getMpaId(), filmId);
+        if (numberOfRecordsAffected == 0) {
+            throw new NotFoundException(String.format("Фильма с id = %s нет", filmId));
+        }
+        filmGenreStorage.deleteFilmGenre(filmId, filmGenreStorage.getFilmGenreIdsByFilmId(filmId));
+        filmGenreStorage.createFilmGenre(filmId, updatedFilm.getGenreIds());
+        return updatedFilm;
     }
 
     @Override
+    @Transactional
     public Film getFilmById(Long filmId) {
-        return null;
+        final String sql = "SELECT * FROM films WHERE id = ?;";
+        try {
+            Film film = jdbcTemplate.queryForObject(sql, new Object[]{filmId},
+                    new int[]{Types.BIGINT}, (rs, rowNum) -> makeFilm(rs));
+            if (film == null) {
+                throw new NotFoundException(String.format("Фильма с id = %s нет", filmId));
+            }
+            film.setGenreIds(filmGenreStorage.getFilmGenreIdsByFilmId(filmId));
+            return film;
+        } catch (EmptyResultDataAccessException ex) {
+            throw new NotFoundException(String.format("Фильма с id = %s нет", filmId));
+        }
     }
 
     @Override
+    @Transactional
     public List<Film> getFilmsByTheSpecifiedIds(List<Long> ids) {
-        return null;
+        final SqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("ids", ids);
+        String sql = "SELECT * FROM films WHERE id IN (:ids);";
+        final List<Film> films = namedParameterJdbcTemplate.query(sql, parameters, (rs, rowNum) -> makeFilm(rs));
+        films.forEach(film -> film.setGenreIds(filmGenreStorage.getFilmGenreIdsByFilmId(film.getId())));
+        return films;
     }
 
     private Film makeFilm(ResultSet rs) throws SQLException {
-        final Film film = Film.builder()
+        return Film.builder()
                 .id(rs.getLong("id"))
                 .name(rs.getString("name"))
                 .description(rs.getString("description"))
                 .releaseDate(rs.getDate("release_date").toLocalDate())
                 .duration(rs.getInt("duration"))
                 .mpaId(rs.getInt("mpa_id")).build();
-        /*final String genreIds = rs.getString("genre_ids");
-        if(genreIds != null) {
-            film.getGenreIds().addAll(Arrays.stream(genreIds.split(","))
-                    .map(Integer::parseInt)
-                    .collect(Collectors.toSet()));
-            Collections.sort(film.getGenreIds());
-        }*/
-        return film;
     }
 }
