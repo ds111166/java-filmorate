@@ -44,7 +44,7 @@ public class FilmDbStorage implements FilmStorage {
     public Film crateFilm(Film newFilm) {
         final String sql = "INSERT INTO films\n" +
                 "(\"name\", description, release_date, duration, mpa_id)\n" +
-                "VALUES(?, ?, ?, ?, ?";
+                "VALUES(?, ?, ?, ?, ?)";
         final KeyHolder keyHolder = new GeneratedKeyHolder();
         final PreparedStatementCreator preparedStatementCreator = connection -> {
             final PreparedStatement ps =
@@ -53,7 +53,12 @@ public class FilmDbStorage implements FilmStorage {
             ps.setString(2, newFilm.getDescription());
             ps.setDate(3, Date.valueOf(newFilm.getReleaseDate()));
             ps.setInt(4, newFilm.getDuration());
-            ps.setInt(5, newFilm.getMpaId());
+            final Integer mpaId = newFilm.getMpaId();
+            if ((mpaId == null)) {
+                ps.setNull(5, Types.INTEGER);
+            } else {
+                ps.setInt(5, mpaId);
+            }
             return ps;
         };
         jdbcTemplate.update(preparedStatementCreator, keyHolder);
@@ -88,10 +93,9 @@ public class FilmDbStorage implements FilmStorage {
         try {
             Film film = jdbcTemplate.queryForObject(sql, new Object[]{filmId},
                     new int[]{Types.BIGINT}, (rs, rowNum) -> makeFilm(rs));
-            if (film == null) {
-                throw new NotFoundException(String.format("Фильма с id = %s нет", filmId));
+            if (film != null) {
+                film.setGenreIds(filmGenreStorage.getFilmGenreIdsByFilmId(filmId));
             }
-            film.setGenreIds(filmGenreStorage.getFilmGenreIdsByFilmId(filmId));
             return film;
         } catch (EmptyResultDataAccessException ex) {
             throw new NotFoundException(String.format("Фильма с id = %s нет", filmId));

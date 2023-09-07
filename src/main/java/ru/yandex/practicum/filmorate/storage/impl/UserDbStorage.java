@@ -73,12 +73,8 @@ public class UserDbStorage implements UserStorage {
     public User getUserById(Long userId) {
         final String sql = "SELECT * FROM users WHERE id = ?;";
         try {
-            User user = jdbcTemplate.queryForObject(sql, new Object[]{userId},
+            return jdbcTemplate.queryForObject(sql, new Object[]{userId},
                     new int[]{Types.BIGINT}, (rs, rowNum) -> makeUser(rs));
-            if (user == null) {
-                throw new NotFoundException(String.format("Пользователя с id = %s не существует", userId));
-            }
-            return user;
         } catch (EmptyResultDataAccessException ex) {
             throw new NotFoundException(String.format("Пользователя с id = %s не существует", userId));
         }

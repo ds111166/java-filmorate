@@ -1,12 +1,12 @@
-insert into mpa (id, name) values (1, 'G');
-insert into mpa (id, name) values (2, 'PG');
-insert into mpa (id, name) values (3, 'PG-13');
-insert into mpa (id, name) values (4, 'R');
-insert into mpa (id, name) values (5, 'NC-17');
+INSERT INTO mpa (id, "name") VALUES (1, 'G');
+INSERT INTO mpa (id, "name") VALUES (2, 'PG');
+INSERT INTO mpa (id, "name") VALUES (3, 'PG-13');
+INSERT INTO mpa (id, "name") VALUES (4, 'R');
+INSERT INTO mpa (id, "name") VALUES (5, 'NC-17');
 
-insert into genres (id, name) values (1, 'Комедия');
-insert into genres (id, name) values (2, 'Драма');
-insert into genres (id, name) values (3, 'Мультфильм');
-insert into genres (id, name) values (4, 'Триллер');
-insert into genres (id, name) values (5, 'Документальный');
-insert into genres (id, name) values (6, 'Боевик');
+INSERT INTO genres (id, "name") VALUES (1, 'Комедия');
+INSERT INTO genres (id, "name") VALUES (2, 'Драма');
+INSERT INTO genres (id, "name") VALUES (3, 'Мультфильм');
+INSERT INTO genres (id, "name") VALUES (4, 'Триллер');
+INSERT INTO genres (id, "name") VALUES (5, 'Документальный');
+INSERT INTO genres (id, "name") VALUES (6, 'Боевик');

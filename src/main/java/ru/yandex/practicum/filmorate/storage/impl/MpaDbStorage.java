@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -29,12 +30,13 @@ public class MpaDbStorage implements MpaStorage {
     @Override
     public Mpa getMpaById(Integer mpaId) {
         final String sql = "SELECT id, \"name\" FROM mpa where id = ?;";
-        final Mpa mpa = jdbcTemplate.queryForObject(sql, new Object[]{mpaId},
-                new int[]{Types.INTEGER}, (rs, rowNum) -> makeMpa(rs));
-        if (mpa == null) {
+        try {
+            return jdbcTemplate.queryForObject(sql, new Object[]{mpaId},
+                    new int[]{Types.INTEGER}, (rs, rowNum) -> makeMpa(rs));
+        } catch (EmptyResultDataAccessException ex) {
             throw new NotFoundException(String.format("рейтинга MPA с id = %s нет", mpaId));
         }
-        return mpa;
+
     }
 
     private Mpa makeMpa(ResultSet rs) throws SQLException {

@@ -28,3 +28,10 @@ Template repository for Filmorate project.
 15. сделаны эндпоинт для получение рейтингов GET /mpa, GET /mpa/{id} - контроллер, сервер, стораге
 16. сделано FriendDbStorage
 17. сделано LikeDbStorage
+18. написан интеграционный тест для MpaDbStorage 
+19. написан интеграционный тест для FilmDbStorage
+20. НАПИСАТЬ интеграционный тест для FilmGenreDbStorage
+21. НАПИСАТЬ интеграционный тест для FriendDbStorage
+22. написан интеграционный тест для GenreDbStorage
+23. НАПИСАТЬ интеграционный тест для LikeDbStorage
+24. НАПИСАТЬ интеграционный тест для UserDbStorage

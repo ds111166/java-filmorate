@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,12 +32,12 @@ public class GenreDbStorage implements GenreStorage {
     @Transactional
     public Genre getGenreById(Integer genreId) {
         final String sql = "SELECT id, \"name\" FROM genres where id = ?;";
-        final Genre genre = jdbcTemplate.queryForObject(sql, new Object[]{genreId},
-                new int[]{Types.INTEGER}, (rs, rowNum) -> makeGenre(rs));
-        if (genre == null) {
+        try {
+            return jdbcTemplate.queryForObject(sql, new Object[]{genreId},
+                    new int[]{Types.INTEGER}, (rs, rowNum) -> makeGenre(rs));
+        } catch (EmptyResultDataAccessException ex) {
             throw new NotFoundException(String.format("жанра с id = %s нет", genreId));
         }
-        return genre;
     }
 
     private Genre makeGenre(ResultSet rs) throws SQLException {

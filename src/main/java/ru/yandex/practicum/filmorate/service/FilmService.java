@@ -18,11 +18,11 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class FilmService {
-    @Qualifier("inMemoryFilmStorage")
+    @Qualifier("filmDbStorage")
     private final FilmStorage filmStorage;
-    @Qualifier("inMemoryUserStorage")
+    @Qualifier("userDbStorage")
     private final UserStorage userStorage;
-    @Qualifier("inMemoryLikeStorage")
+    @Qualifier("likeDbStorage")
     private final LikeStorage likeStorage;
 
     public List<Film> getFilms() {
