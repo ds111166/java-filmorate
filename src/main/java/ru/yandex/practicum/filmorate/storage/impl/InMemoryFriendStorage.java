@@ -27,7 +27,9 @@ public class InMemoryFriendStorage implements FriendStorage {
         Friendship pair2to1 = Friendship.builder().userId(friendId).friendId(userId).build();
         final boolean is2to1 = friendships.containsKey(pair2to1);
         if (is2to1) {
-            friendships.put(pair2to1, friendships.get(pair2to1) + difference);
+            if (pair2to1.getDifference() != 0) {
+                friendships.put(pair2to1, friendships.get(pair2to1) + difference);
+            }
         } else {
             friendships.put(pair1to2, difference);
         }

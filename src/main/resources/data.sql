@@ -1,12 +1,16 @@
-INSERT INTO mpa (id, "name") VALUES (1, 'G');
-INSERT INTO mpa (id, "name") VALUES (2, 'PG');
-INSERT INTO mpa (id, "name") VALUES (3, 'PG-13');
-INSERT INTO mpa (id, "name") VALUES (4, 'R');
-INSERT INTO mpa (id, "name") VALUES (5, 'NC-17');
+insert into mpa (id, "name") select * from (
+select 1, 'G' union
+select 2, 'PG' union
+select 3, 'PG-13' union
+select 4, 'R' union
+select 5, 'NC-17')
+x where not exists(select * from mpa);
 
-INSERT INTO genres (id, "name") VALUES (1, 'Комедия');
-INSERT INTO genres (id, "name") VALUES (2, 'Драма');
-INSERT INTO genres (id, "name") VALUES (3, 'Мультфильм');
-INSERT INTO genres (id, "name") VALUES (4, 'Триллер');
-INSERT INTO genres (id, "name") VALUES (5, 'Документальный');
-INSERT INTO genres (id, "name") VALUES (6, 'Боевик');
+insert into genres (id, "name") select * from (
+select 1, 'Комедия' union
+select 2, 'Драма' union
+select 3, 'Мультфильм' union
+select 4, 'Триллер' union
+select 5, 'Документальный' union
+select 6, 'Боевик')
+x where not exists(select * from genres);

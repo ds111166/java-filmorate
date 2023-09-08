@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -23,54 +25,53 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmDbStorageTest {
-    private final FilmDbStorage filmDbStorage;
+
+    @Qualifier("filmDbStorage")
+    private final FilmStorage filmStorage;
 
     @Test
-    @Sql(scripts = {"classpath:test/clean_film.sql"})
-        //@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-    void getFilms() {
-        final List<Film> films = filmDbStorage.getFilms();
+    @Sql(scripts = {"classpath:test/clearing.sql"})
+    void getFilmsTest() {
+        final List<Film> films = filmStorage.getFilms();
         assertEquals(films.size(), 0, "Не верное количество фильмов получено: " + films.size());
 
-        Film film1 = filmDbStorage.crateFilm(Film.builder().name("Name1").description("this film1").duration(120)
+        Film film1 = filmStorage.crateFilm(Film.builder().name("Name1").description("this film1").duration(120)
                 .releaseDate(LocalDate.of(1990, 1, 1)).build());
-        Film film2 = filmDbStorage.crateFilm(Film.builder().name("Name2").description("this film2").duration(100)
+        Film film2 = filmStorage.crateFilm(Film.builder().name("Name2").description("this film2").duration(100)
                 .releaseDate(LocalDate.of(1990, 2, 2)).build());
-        Film film3 = filmDbStorage.crateFilm(Film.builder().name("Name3").description("this film3").duration(110)
+        Film film3 = filmStorage.crateFilm(Film.builder().name("Name3").description("this film3").duration(110)
                 .releaseDate(LocalDate.of(1990, 3, 3)).build());
         Map<Long, Film> newFilms = Stream.of(film1, film2, film3)
                 .collect(Collectors.toMap(Film::getId, film -> film, (a, b) -> b));
-        Map<Long, Film> films1 = filmDbStorage.getFilms().stream()
+        Map<Long, Film> films1 = filmStorage.getFilms().stream()
                 .collect(Collectors.toMap(Film::getId, film -> film, (a, b) -> b));
         assertEquals(films1.size(), newFilms.size(), "Не верное количество фильмов получено: " + films1.size());
         assertTrue(films1.keySet().containsAll(newFilms.keySet()), "Не верный список фильмов получен");
     }
 
     @Test
-    //@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-    @Sql(scripts = {"classpath:test/clean_film.sql"})
-    void crateFilm() {
-        Film film1 = filmDbStorage.crateFilm(Film.builder().name("Name1").description("this film1").duration(120)
+    @Sql(scripts = {"classpath:test/clearing.sql"})
+    void crateFilmTest() {
+        Film film1 = filmStorage.crateFilm(Film.builder().name("Name1").description("this film1").duration(120)
                 .releaseDate(LocalDate.of(1990, 1, 1)).build());
         assertNotNull(film1, "При создании фильма получен NULL");
         assertEquals(film1.getId(), 1, "Созданному фильму присвоен не верный id: " + film1.getId());
-        Film film2 = filmDbStorage.crateFilm(Film.builder().name("Name2").description("this film2").duration(100)
+        Film film2 = filmStorage.crateFilm(Film.builder().name("Name2").description("this film2").duration(100)
                 .releaseDate(LocalDate.of(1990, 2, 2)).mpaId(1).build());
         assertNotNull(film2, "При создании фильма получен NULL");
         assertEquals(film2.getId(), 2, "Созданному фильму присвоен не верный id: " + film2.getId());
         final DataIntegrityViolationException exception = assertThrows(
                 DataIntegrityViolationException.class,
-                () -> filmDbStorage.crateFilm(Film.builder().name("Name3").description("this film2").duration(110)
+                () -> filmStorage.crateFilm(Film.builder().name("Name3").description("this film2").duration(110)
                         .releaseDate(LocalDate.of(1990, 3, 3)).mpaId(9999).build()));
         assertTrue(Objects.requireNonNull(exception.getMessage()).contains("Referential integrity constraint violation"),
                 "При попытке создания фильма с не верным id MPA получено не верное исключение");
     }
 
     @Test
-    //@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-    @Sql(scripts = {"classpath:test/clean_film.sql"})
-    void updateFilm() {
-        Film film1 = filmDbStorage.crateFilm(Film.builder().name("Name1").description("this film1").duration(120)
+    @Sql(scripts = {"classpath:test/clearing.sql"})
+    void updateFilmTest() {
+        Film film1 = filmStorage.crateFilm(Film.builder().name("Name1").description("this film1").duration(120)
                 .releaseDate(LocalDate.of(1990, 1, 1)).build());
         assertNotNull(film1, "При создании фильма получен NULL");
         assertEquals(film1.getId(), 1, "Созданному фильму присвоен не верный id: " + film1.getId());
@@ -80,8 +81,8 @@ class FilmDbStorageTest {
         film1.setReleaseDate(film1.getReleaseDate().plusDays(10));
         film1.setGenreIds(Arrays.asList(1, 2, 3));
         film1.setMpaId(4);
-        filmDbStorage.updateFilm(film1);
-        final Film film2 = filmDbStorage.getFilmById(film1.getId());
+        filmStorage.updateFilm(film1);
+        final Film film2 = filmStorage.getFilmById(film1.getId());
         assertEquals(film1.getId(), film2.getId(),
                 "Метод обновления фильма вернул фильм с неверным id: " + film2.getId());
         assertEquals("Name1" + " ч.2", film2.getName(),
@@ -99,7 +100,7 @@ class FilmDbStorageTest {
         film2.setId(9999L);
         final NotFoundException exception = assertThrows(
                 NotFoundException.class,
-                () -> filmDbStorage.updateFilm(film2));
+                () -> filmStorage.updateFilm(film2));
         assertTrue(Objects.requireNonNull(exception.getMessage()).contains("Фильма с id = 9999 нет"),
                 "При попытке обновления фильма с не верным id не верное исключение");
 
@@ -107,14 +108,14 @@ class FilmDbStorageTest {
     }
 
     @Test
-    @Sql(scripts = {"classpath:test/clean_film.sql"})
-    void getFilmById() {
-        Film film1 = filmDbStorage.crateFilm(Film.builder().name("Name1").description("this film1").duration(120)
+    @Sql(scripts = {"classpath:test/clearing.sql"})
+    void getFilmByIdTest() {
+        Film film1 = filmStorage.crateFilm(Film.builder().name("Name1").description("this film1").duration(120)
                 .releaseDate(LocalDate.of(1990, 1, 1))
                 .genreIds(Arrays.asList(1, 2, 3)).mpaId(4).build());
         assertNotNull(film1, "При создании фильма получен NULL");
         assertEquals(film1.getId(), 1, "Созданному фильму присвоен не верный id: " + film1.getId());
-        final Film film2 = filmDbStorage.getFilmById(film1.getId());
+        final Film film2 = filmStorage.getFilmById(film1.getId());
         assertEquals(film1.getId(), film2.getId(),
                 "Метод получения фильма по id вернул фильм с неверным id: " + film2.getId());
         assertEquals(film1.getName(), film2.getName(),
@@ -132,27 +133,27 @@ class FilmDbStorageTest {
 
         final NotFoundException exception = assertThrows(
                 NotFoundException.class,
-                () -> filmDbStorage.getFilmById(999222L));
+                () -> filmStorage.getFilmById(999222L));
         assertTrue(Objects.requireNonNull(exception.getMessage()).contains("Фильма с id = 999222 нет"),
                 "При попытке получения фильма по id с не верным id не верное исключение");
     }
 
     @Test
-    @Sql(scripts = {"classpath:test/clean_film.sql"})
-    void getFilmsByTheSpecifiedIds() {
-        Film film1 = filmDbStorage.crateFilm(Film.builder().name("Name1").description("this film1").duration(120)
+    @Sql(scripts = {"classpath:test/clearing.sql"})
+    void getFilmsByTheSpecifiedIdsTest() {
+        Film film1 = filmStorage.crateFilm(Film.builder().name("Name1").description("this film1").duration(120)
                 .releaseDate(LocalDate.of(1990, 1, 1)).build());
-        Film film2 = filmDbStorage.crateFilm(Film.builder().name("Name2").description("this film2").duration(100)
+        Film film2 = filmStorage.crateFilm(Film.builder().name("Name2").description("this film2").duration(100)
                 .releaseDate(LocalDate.of(1990, 2, 2)).build());
-        Film film3 = filmDbStorage.crateFilm(Film.builder().name("Name3").description("this film3").duration(110)
+        Film film3 = filmStorage.crateFilm(Film.builder().name("Name3").description("this film3").duration(110)
                 .releaseDate(LocalDate.of(1990, 3, 3)).build());
-        Film film4 = filmDbStorage.crateFilm(Film.builder().name("Name4").description("this film4").duration(115)
+        Film film4 = filmStorage.crateFilm(Film.builder().name("Name4").description("this film4").duration(115)
                 .releaseDate(LocalDate.of(1990, 4, 4)).build());
 
         Map<Long, Film> newFilms = Stream.of(film1, film2, film3)
                 .collect(Collectors.toMap(Film::getId, film -> film, (a, b) -> b));
         List<Long> ids = new ArrayList<>(newFilms.keySet());
-        Map<Long, Film> films1 = filmDbStorage.getFilmsByTheSpecifiedIds(ids).stream()
+        Map<Long, Film> films1 = filmStorage.getFilmsByTheSpecifiedIds(ids).stream()
                 .collect(Collectors.toMap(Film::getId, film -> film, (a, b) -> b));
         assertEquals(films1.size(), newFilms.size(), "Не верное количество фильмов получено: " + films1.size());
         assertTrue(films1.keySet().containsAll(newFilms.keySet()), "Не верный список фильмов получен");

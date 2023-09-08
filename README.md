@@ -35,3 +35,4 @@ Template repository for Filmorate project.
 22. написан интеграционный тест для GenreDbStorage
 23. НАПИСАТЬ интеграционный тест для LikeDbStorage
 24. НАПИСАТЬ интеграционный тест для UserDbStorage
+25. ЗАМЕНИТ DataIntegrityViolationException на NotFoundException путем предварительного вызова getById соответстьвующих storage!!!! в storage and tets!!!!
