@@ -30,9 +30,13 @@ Template repository for Filmorate project.
 17. сделано LikeDbStorage
 18. написан интеграционный тест для MpaDbStorage 
 19. написан интеграционный тест для FilmDbStorage
-20. НАПИСАТЬ интеграционный тест для FilmGenreDbStorage
-21. НАПИСАТЬ интеграционный тест для FriendDbStorage
+20. написан интеграционный тест для FilmGenreDbStorage
+21. написан интеграционный тест для FriendDbStorage
 22. написан интеграционный тест для GenreDbStorage
-23. НАПИСАТЬ интеграционный тест для LikeDbStorage
-24. НАПИСАТЬ интеграционный тест для UserDbStorage
+23. написан интеграционный тест для LikeDbStorage
+24. написан интеграционный тест для UserDbStorage
 25. ЗАМЕНИТ DataIntegrityViolationException на NotFoundException путем предварительного вызова getById соответстьвующих storage!!!! в storage and tets!!!!
+26. СДЕЛАТЬ ограничение на поле direct дружбы
+27. ИСПРАВИТЬ InMemoryFriendStorage
+28. ДОБАВИТЬ ЛОГИРОВАНИЕ
+29. ВЫПОЛНИТ тесты POSTMAN

@@ -16,6 +16,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.MpaStorage;
 
 import java.sql.*;
 import java.util.List;
@@ -29,6 +30,8 @@ public class FilmDbStorage implements FilmStorage {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     @Qualifier("filmGenreDbStorage")
     private final FilmGenreStorage filmGenreStorage;
+    @Qualifier("mpaDbStorage")
+    private final MpaStorage mpaStorage;
 
     @Override
     @Transactional
@@ -46,6 +49,8 @@ public class FilmDbStorage implements FilmStorage {
                 "(\"name\", description, release_date, duration, mpa_id)\n" +
                 "VALUES(?, ?, ?, ?, ?)";
         final KeyHolder keyHolder = new GeneratedKeyHolder();
+
+
         final PreparedStatementCreator preparedStatementCreator = connection -> {
             final PreparedStatement ps =
                     connection.prepareStatement(sql, new String[]{"id"});
@@ -57,6 +62,7 @@ public class FilmDbStorage implements FilmStorage {
             if ((mpaId == null)) {
                 ps.setNull(5, Types.INTEGER);
             } else {
+                mpaStorage.getMpaById(mpaId);
                 ps.setInt(5, mpaId);
             }
             return ps;

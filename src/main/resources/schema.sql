@@ -21,12 +21,12 @@ create table if not exists users --*
 
 create table if not exists friendships --*
 (
-    user_id   bigint,
-    friend_id bigint,
-    difference bigint  not null,
-    foreign key (user_id) references users (id) on delete cascade,
-    foreign key (friend_id) references users (id) on delete cascade,
-    primary key (user_id, friend_id)
+    user1_id   bigint,
+    user2_id bigint,
+    direction int  not null,
+    foreign key (user1_id) references users (id) on delete cascade,
+    foreign key (user2_id) references users (id) on delete cascade,
+    primary key (user1_id, user2_id)
 );
 
 create table if not exists films --*

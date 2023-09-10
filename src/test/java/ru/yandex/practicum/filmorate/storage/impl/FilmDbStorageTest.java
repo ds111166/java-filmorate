@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -60,11 +59,11 @@ class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(1990, 2, 2)).mpaId(1).build());
         assertNotNull(film2, "При создании фильма получен NULL");
         assertEquals(film2.getId(), 2, "Созданному фильму присвоен не верный id: " + film2.getId());
-        final DataIntegrityViolationException exception = assertThrows(
-                DataIntegrityViolationException.class,
+        final NotFoundException exception = assertThrows(
+                NotFoundException.class,
                 () -> filmStorage.crateFilm(Film.builder().name("Name3").description("this film2").duration(110)
                         .releaseDate(LocalDate.of(1990, 3, 3)).mpaId(9999).build()));
-        assertTrue(Objects.requireNonNull(exception.getMessage()).contains("Referential integrity constraint violation"),
+        assertTrue(Objects.requireNonNull(exception.getMessage()).contains("рейтинга MPA с id = 9999 нет"),
                 "При попытке создания фильма с не верным id MPA получено не верное исключение");
     }
 

@@ -45,7 +45,7 @@ class FriendDbStorageTest {
         friendStorage.addFriend(user1.getId(), user2.getId());
         friendStorage.addFriend(user1.getId(), user3.getId());
         friendStorage.addFriend(user1.getId(), user4.getId());
-        final Set<Long> idsFriendsForUser1 = friendStorage.getIdsFriendsForUser(user1.getId());
+        Set<Long> idsFriendsForUser1 = friendStorage.getIdsFriendsForUser(user1.getId());
         assertEquals(idsFriendsForUser1.size(), 3,
                 "Не верное количество пользователей друзей пользователя user1 получено: "
                         + idsFriendsForUser1.size());
@@ -56,7 +56,10 @@ class FriendDbStorageTest {
         assertEquals(idsFriendsForUser2.size(), 2,
                 "Не верное количество пользователей друзей пользователя user2 получено: "
                         + idsFriendsForUser2.size());
-
+        idsFriendsForUser1 = friendStorage.getIdsFriendsForUser(user1.getId());
+        assertEquals(idsFriendsForUser1.size(), 3,
+                "Не верное количество пользователей друзей пользователя user1 получено: "
+                        + idsFriendsForUser1.size());
         final NotFoundException exception = assertThrows(
                 NotFoundException.class,
                 () -> friendStorage.addFriend(-1L, 789L));
@@ -73,24 +76,82 @@ class FriendDbStorageTest {
     @Test
     @Sql(scripts = {"classpath:test/clearing.sql"})
     void deleteFriendTest() {
+        addFriendTest();
+        Set<Long> idsFriendsForUser1 = friendStorage.getIdsFriendsForUser(1L);
+        assertEquals(idsFriendsForUser1.size(), 3,
+                "Не верное количество пользователей друзей пользователя user1 получено: "
+                        + idsFriendsForUser1.size());
+        friendStorage.deleteFriend(2L, 1L);
+        idsFriendsForUser1 = friendStorage.getIdsFriendsForUser(1L);
+        assertEquals(idsFriendsForUser1.size(), 3,
+                "Не верное количество пользователей друзей пользователя user1 получено: "
+                        + idsFriendsForUser1.size());
+        friendStorage.deleteFriend(1L, 3L);
+        final Set<Long> idsFriendsForUser1_2 = friendStorage.getIdsFriendsForUser(1L);
+        assertEquals(idsFriendsForUser1_2.size(), 2,
+                "Не верное количество пользователей друзей пользователя user1 получено: "
+                        + idsFriendsForUser1_2.size());
+
+        final NotFoundException exception1 = assertThrows(
+                NotFoundException.class,
+                () -> friendStorage.deleteFriend(1L, 3333L));
+        assertTrue(Objects.requireNonNull(exception1.getMessage()).contains("Пользователя с id = 3333 не существует"),
+                "При удалении связи 'Дружба' с пользователем не верным id получено не верное исключение");
+        final NotFoundException exception2 = assertThrows(
+                NotFoundException.class,
+                () -> friendStorage.deleteFriend(1111111L, 3333L));
+        assertTrue(Objects.requireNonNull(exception2.getMessage()).contains("Пользователя с id = 1111111 не существует"),
+                "При удалении связи 'Дружба' с пользователем не верным id получено не верное исключение");
     }
 
     @Test
     @Sql(scripts = {"classpath:test/clearing.sql"})
     void getIdsFriendsForUserTest() {
+        addFriendTest();
+        Set<Long> idsFriendsForUser2 = friendStorage.getIdsFriendsForUser(2L);
+        assertEquals(idsFriendsForUser2.size(), 2,
+                "Не верное количество пользователей друзей пользователя user2 получено: "
+                        + idsFriendsForUser2.size());
+        friendStorage.addFriend(2L, 2L);
+        idsFriendsForUser2 = friendStorage.getIdsFriendsForUser(2L);
+        assertEquals(idsFriendsForUser2.size(), 3,
+                "Не верное количество пользователей друзей пользователя user2 получено: "
+                        + idsFriendsForUser2.size());
+        final NotFoundException exception1 = assertThrows(
+                NotFoundException.class,
+                () -> friendStorage.getIdsFriendsForUser(999999L));
+        assertTrue(Objects.requireNonNull(exception1.getMessage()).contains("Пользователя с id = 999999 не существует"),
+                "При получении друзей для пользователя с неыерным id получено не верное исключение");
     }
 
     @Test
     @Sql(scripts = {"classpath:test/clearing.sql"})
     void getMutualFriendsOfUsersTest() {
         addFriendTest();
-        friendStorage.addFriend(1L, 1L);
+        //friendStorage.addFriend(1L, 1L);
         final User user1 = userStorage.getUserById(1L);
         final User user2 = userStorage.getUserById(2L);
+        final User user3 = userStorage.getUserById(3L);
         final Set<Long> mutualFriendsOfUsers1And2 =
                 friendStorage.getMutualFriendsOfUsers(user1.getId(), user2.getId());
-        assertEquals(mutualFriendsOfUsers1And2.size(), 222,
+        assertEquals(mutualFriendsOfUsers1And2.size(), 1,
                 String.format("Не верное количество обших друзей у %s и %s получено: %s (%s)",
                         user1.getName(), user2.getName(), mutualFriendsOfUsers1And2.size(), mutualFriendsOfUsers1And2));
+        final Set<Long> mutualFriendsOfUsers1And1 =
+                friendStorage.getMutualFriendsOfUsers(user1.getId(), user1.getId());
+        assertEquals(mutualFriendsOfUsers1And1.size(), 3,
+                String.format("Не верное количество обших друзей у %s и %s получено: %s (%s)",
+                        user1.getName(), user1.getName(), mutualFriendsOfUsers1And1.size(), mutualFriendsOfUsers1And1));
+        final Set<Long> mutualFriendsOfUsers2And3 =
+                friendStorage.getMutualFriendsOfUsers(user2.getId(), user3.getId());
+        assertEquals(mutualFriendsOfUsers2And3.size(), 0,
+                String.format("Не верное количество обших друзей у %s и %s получено: %s (%s)",
+                        user2.getName(), user3.getName(), mutualFriendsOfUsers2And3.size(), mutualFriendsOfUsers2And3));
+        ;
+        final NotFoundException exception1 = assertThrows(
+                NotFoundException.class,
+                () -> friendStorage.getMutualFriendsOfUsers(user2.getId(), 8788L));
+        assertTrue(Objects.requireNonNull(exception1.getMessage()).contains("Пользователя с id = 8788 не существует"),
+                "При получении общих друзей для пользователей с не верным id получено не верное исключение");
     }
 }

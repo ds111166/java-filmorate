@@ -6,10 +6,8 @@ import ru.yandex.practicum.filmorate.model.Friendship;
 import ru.yandex.practicum.filmorate.storage.FriendStorage;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component("inMemoryFriendStorage")
 public class InMemoryFriendStorage implements FriendStorage {
@@ -22,6 +20,7 @@ public class InMemoryFriendStorage implements FriendStorage {
 
     @Override
     public void addFriend(long userId, long friendId) {
+        /*
         final long difference = userId - friendId;
         Friendship pair1to2 = Friendship.builder().userId(userId).friendId(friendId).build();
         Friendship pair2to1 = Friendship.builder().userId(friendId).friendId(userId).build();
@@ -33,10 +32,13 @@ public class InMemoryFriendStorage implements FriendStorage {
         } else {
             friendships.put(pair1to2, difference);
         }
+
+         */
     }
 
     @Override
     public void deleteFriend(long userId, long friendId) {
+        /*
         final long difference = userId - friendId;
         Friendship pair1to2 = Friendship.builder().userId(userId).friendId(friendId).build();
         Friendship pair2to1 = Friendship.builder().userId(friendId).friendId(userId).build();
@@ -63,10 +65,13 @@ public class InMemoryFriendStorage implements FriendStorage {
                 friendships.put(pair2to1, -1 * difference);
             }
         }
+        */
+
     }
 
     @Override
     public Set<Long> getIdsFriendsForUser(long userId) {
+        /*
         Set<Long> ids = new HashSet<>();
         for (Map.Entry<Friendship, Long> entry : friendships.entrySet()) {
             final Friendship friendship = entry.getKey();
@@ -78,13 +83,19 @@ public class InMemoryFriendStorage implements FriendStorage {
             }
         }
         return ids;
+         */
+        return null;
     }
 
     @Override
     public Set<Long> getMutualFriendsOfUsers(long userId, long otherId) {
+        /*
         return getIdsFriendsForUser(userId)
                 .stream()
                 .filter(id -> getIdsFriendsForUser(otherId).contains(id))
                 .collect(Collectors.toSet());
+
+         */
+        return null;
     }
 }
