@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.jdbc.Sql;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -15,9 +17,9 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @SpringBootTest
@@ -27,13 +29,17 @@ class FilmGenreDbStorageTest {
 
     @Qualifier("filmDbStorage")
     private final FilmStorage filmStorage;
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Qualifier("filmGenreDbStorage")
     private final FilmGenreStorage filmGenreStorage;
 
+    //private final FilmStorage filmStorage = applicationContext.getBean("FilmDbStorage",FilmDbStorage.class );
     @Test
     @Sql(scripts = {"classpath:test/clearing.sql"})
     void createFilmGenreTest() {
+
         Film film = filmStorage.crateFilm(Film.builder().name("Name1").description("this film1").duration(120)
                 .releaseDate(LocalDate.of(1990, 1, 1)).build());
         final Film film1 = filmStorage.getFilmById(film.getId());
@@ -47,6 +53,16 @@ class FilmGenreDbStorageTest {
         assertEquals(genreIds2.size(), genresIds.size(),
                 "Не верное количество жанров фильма получено: " + genreIds2.size());
         assertTrue(genreIds2.containsAll(genresIds), "Список id жанров назначенных фильму не верен");
+        final NotFoundException exception1 = assertThrows(
+                NotFoundException.class,
+                () -> filmGenreStorage.createFilmGenre(989898L, genresIds));
+        assertTrue(Objects.requireNonNull(exception1.getMessage()).contains("Фильма с id = 989898 нет"),
+                "При отнесении фильм с не верным id к жанрам получено не верное исключение");
+        final NotFoundException exception2 = assertThrows(
+                NotFoundException.class,
+                () -> filmGenreStorage.createFilmGenre(film.getId(), Arrays.asList(3, 98)));
+        assertTrue(Objects.requireNonNull(exception2.getMessage()).contains("Жанра с id = 98 нет"),
+                "При отнесении фильма к жанрам с не верным id получено не верное исключение");
     }
 
     @Test
@@ -67,6 +83,11 @@ class FilmGenreDbStorageTest {
                         "не верное количество жанров фильма получено: " + film2.getGenreIds().size());
         assertTrue(film2.getGenreIds().contains(2), "После удаления двух жанров фильма " +
                 "не верный id жанров фильма остался: " + film2.getGenreIds());
+        final NotFoundException exception2 = assertThrows(
+                NotFoundException.class,
+                () -> filmGenreStorage.deleteFilmGenre(film1.getId(), Arrays.asList(1111, 422)));
+        assertTrue(Objects.requireNonNull(exception2.getMessage()).contains("Жанра с id = 1111 нет"),
+                "При удалении жанров с неверными id от фильма получено не верное исключение");
     }
 
     @Test

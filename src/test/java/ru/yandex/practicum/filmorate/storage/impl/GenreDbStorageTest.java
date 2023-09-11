@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.util.Map;
@@ -20,12 +21,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class GenreDbStorageTest {
-    @Qualifier("genreDbStorage")
-    private final GenreStorage genreStorage;
 
+    private final GenreService genreService;
     @Test
     void getGenresTest() {
-        final Map<Integer, String> idToGenre = genreStorage.getGenres().stream()
+        final Map<Integer, String> idToGenre = genreService.getGenres().stream()
                 .collect(Collectors.toMap(Genre::getId, Genre::getName, (a, b) -> b));
 
         assertEquals(idToGenre.size(), 6, "Жанров количество не верное получено");
@@ -39,14 +39,14 @@ class GenreDbStorageTest {
 
     @Test
     void getGenreByIdTest() {
-        final Genre genre = genreStorage.getGenreById(1);
+        final Genre genre = genreService.getGenreById(1);
         assertEquals(genre.getId(), 1, "По id=1 жанр с неверным id = " + genre.getId() + " получен");
         assertEquals(genre.getName(), "Комедия",
                 "по id=1 жанр с не верным наименованием: '" + genre.getName() + "' получен");
         final NotFoundException exception = assertThrows(
                 NotFoundException.class,
-                () -> genreStorage.getGenreById(9999));
-        assertEquals("жанра с id = 9999 нет",
+                () -> genreService.getGenreById(9999));
+        assertEquals("Жанра с id = 9999 нет",
                 exception.getMessage(),
                 "При попытке получить жанра по не верному id не верное сообщение получено");
     }

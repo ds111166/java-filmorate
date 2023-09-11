@@ -36,7 +36,7 @@ public class GenreDbStorage implements GenreStorage {
             return jdbcTemplate.queryForObject(sql, new Object[]{genreId},
                     new int[]{Types.INTEGER}, (rs, rowNum) -> makeGenre(rs));
         } catch (EmptyResultDataAccessException ex) {
-            throw new NotFoundException(String.format("жанра с id = %s нет", genreId));
+            throw new NotFoundException(String.format("Жанра с id = %s нет", genreId));
         }
     }
 

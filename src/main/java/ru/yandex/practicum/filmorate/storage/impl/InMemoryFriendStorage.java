@@ -1,101 +1,113 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Friendship;
 import ru.yandex.practicum.filmorate.storage.FriendStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Component("inMemoryFriendStorage")
 public class InMemoryFriendStorage implements FriendStorage {
 
-    private final Map<Friendship, Long> friendships;
+    @Qualifier("inMemoryUserStorage")
+    private final UserStorage userStorage;
 
-    public InMemoryFriendStorage() {
-        this.friendships = new HashMap<>();
-    }
+    private final Map<Friendship, Integer> friendships = new HashMap<>();
+    ;
 
     @Override
     public void addFriend(long userId, long friendId) {
-        /*
-        final long difference = userId - friendId;
-        Friendship pair1to2 = Friendship.builder().userId(userId).friendId(friendId).build();
-        Friendship pair2to1 = Friendship.builder().userId(friendId).friendId(userId).build();
-        final boolean is2to1 = friendships.containsKey(pair2to1);
-        if (is2to1) {
-            if (pair2to1.getDifference() != 0) {
-                friendships.put(pair2to1, friendships.get(pair2to1) + difference);
-            }
+        userStorage.getUserById(userId);
+        userStorage.getUserById(friendId);
+        long user1Id = Long.min(userId, friendId);
+        long user2Id = Long.max(userId, friendId);
+        final int direction = calculateDirection(user1Id, userId, friendId);
+        final Friendship friendship = getFriendshipByIds(user1Id, user2Id);
+        if (friendship == null) {
+            friendships.put(Friendship.builder().user1Id(user1Id).user2Id(user2Id).build(),
+                    direction);
         } else {
-            friendships.put(pair1to2, difference);
+            int existingDirection = friendship.getDirection();
+            if (existingDirection != 0 && existingDirection != direction) {
+                friendships.put(Friendship.builder().user1Id(user1Id).user2Id(user2Id).build(),
+                        existingDirection + direction);
+            }
         }
 
-         */
     }
 
     @Override
     public void deleteFriend(long userId, long friendId) {
-        /*
-        final long difference = userId - friendId;
-        Friendship pair1to2 = Friendship.builder().userId(userId).friendId(friendId).build();
-        Friendship pair2to1 = Friendship.builder().userId(friendId).friendId(userId).build();
-        final boolean is1to2 = friendships.containsKey(pair1to2);
-        final boolean is2to1 = friendships.containsKey(pair2to1);
-        if (difference == 0) {
-            if (is1to2) {
-                friendships.remove(pair1to2);
-            }
-            if (is2to1) {
-                friendships.remove(pair2to1);
-            }
-            return;
-        }
-        if (is1to2) {
-            if (friendships.get(pair1to2) == 0) {
-                friendships.put(pair1to2, difference);
-            } else {
-                friendships.remove(pair1to2);
+        userStorage.getUserById(userId);
+        userStorage.getUserById(friendId);
+        long user1Id = Long.min(userId, friendId);
+        long user2Id = Long.max(userId, friendId);
+        final int direction = calculateDirection(user1Id, userId, friendId);
+        final Friendship friendship = getFriendshipByIds(user1Id, user2Id);
+        if (friendship != null) {
+            int existingDirection = friendship.getDirection();
+            if (existingDirection == 0) {
+                friendships.put(Friendship.builder().user1Id(user1Id).user2Id(user2Id).build(),
+                        -direction);
+            } else if (existingDirection == direction) {
+                friendships.remove(Friendship.builder().user1Id(user1Id).user2Id(user2Id).build());
             }
         }
-        if (is2to1) {
-            if (friendships.get(pair2to1) == 0) {
-                friendships.put(pair2to1, -1 * difference);
-            }
-        }
-        */
 
     }
 
     @Override
     public Set<Long> getIdsFriendsForUser(long userId) {
-        /*
+
         Set<Long> ids = new HashSet<>();
-        for (Map.Entry<Friendship, Long> entry : friendships.entrySet()) {
+        for (Map.Entry<Friendship, Integer> entry : friendships.entrySet()) {
             final Friendship friendship = entry.getKey();
-            if (friendship.getUserId() == userId) {
-                ids.add(friendship.getFriendId());
+            final Integer direction = entry.getValue();
+            if (friendship.getUser2Id() == userId && direction <= 0) {
+                ids.add(friendship.getUser1Id());
             }
-            if (entry.getValue() == 0 && friendship.getFriendId() == userId) {
-                ids.add(friendship.getUserId());
+            if (friendship.getUser1Id() == userId && direction >= 0) {
+                ids.add(friendship.getUser2Id());
             }
         }
         return ids;
-         */
-        return null;
     }
 
     @Override
     public Set<Long> getMutualFriendsOfUsers(long userId, long otherId) {
-        /*
+
         return getIdsFriendsForUser(userId)
                 .stream()
                 .filter(id -> getIdsFriendsForUser(otherId).contains(id))
                 .collect(Collectors.toSet());
+    }
 
-         */
+    private Friendship getFriendshipByIds(long user1Id, long user2Id) {
+        Friendship friendship = Friendship.builder().user1Id(user1Id).user2Id(user2Id).build();
+        if (friendships.containsKey(friendship)) {
+            final Integer direction = friendships.get(friendship);
+            friendship.setDirection(direction);
+            return friendship;
+        }
         return null;
+    }
+
+    private int calculateDirection(long user1Id, long userId, long friendId) {
+        if (userId == friendId) {
+            return 0;
+        }
+        if (user1Id == userId) {
+            return 1;
+        }
+        return -1;
     }
 }

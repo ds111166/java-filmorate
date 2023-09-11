@@ -37,6 +37,11 @@ public class UserDbStorage implements UserStorage {
     @Override
     @Transactional
     public User createUser(User newUser) {
+
+        final String name = newUser.getName();
+        if (name == null || name.isEmpty() || name.isBlank()) {
+            newUser.setName(newUser.getLogin());
+        }
         final String sql = "INSERT INTO users (login, \"name\", email, birthday)\n" +
                 "VALUES(?, ?, ?, ?);";
         final KeyHolder keyHolder = new GeneratedKeyHolder();

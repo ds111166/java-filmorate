@@ -1,14 +1,5 @@
 # java-filmorate
-```
-//final String sql = "SELECT id, \"name\", description, release_date, duration, mpa_id FROM films;";
-/*final String sql = "SELECT fi.id, fi.\"name\", fi.description, fi.release_date," +
-" fi.duration, fi.mpa_id, fg.genre_id AS genre_id FROM films fi\n" +
-"LEFT JOIN film_genre fg ON fg.film_id = fi.id;";*/
-/*final String sql = "SELECT fi.id, fi.\"name\", fi.description, fi.release_date, fi.duration, fi.mpa_id, \n" +
-"(SELECT string_agg(cast(fg.genre_id AS text), ',')" +
-" FROM film_genre fg WHERE fg.film_id = fi.id) AS genre_ids\n" +
-"FROM films fi;";*/
-```
+
 
 Template repository for Filmorate project.
 1. add <artifactId>spring-boot-starter-jdbc</artifactId>
@@ -35,8 +26,8 @@ Template repository for Filmorate project.
 22. написан интеграционный тест для GenreDbStorage
 23. написан интеграционный тест для LikeDbStorage
 24. написан интеграционный тест для UserDbStorage
-25. ЗАМЕНИТ DataIntegrityViolationException на NotFoundException путем предварительного вызова getById соответстьвующих storage!!!! в storage and tets!!!!
-26. СДЕЛАТЬ ограничение на поле direct дружбы
-27. ИСПРАВИТЬ InMemoryFriendStorage
-28. ДОБАВИТЬ ЛОГИРОВАНИЕ
+25. заменил  DataIntegrityViolationException на NotFoundException путем предварительного вызова getById соответстьвующих storage!!!! в storage and tets!!!!
+26. сделано ограничение на поле direct дружбы direction int  not null check (((direction = 0) or (direction = '-1'::integer) or (direction = 1)))
+27. исправлено InMemoryFriendStorage
+28. добавил ЛОГИРОВАНИЕ
 29. ВЫПОЛНИТ тесты POSTMAN

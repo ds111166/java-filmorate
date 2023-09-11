@@ -47,11 +47,14 @@ public class UserService {
     }
 
     public List<User> getFriendsForUser(Long userId) {
+        userStorage.getUserById(userId);
         return userStorage
                 .getUsersByTheSpecifiedIds(friendStorage.getIdsFriendsForUser(userId));
     }
 
     public List<User> getMutualFriendsOfUsers(Long userId, long otherId) {
+        userStorage.getUserById(userId);
+        userStorage.getUserById(otherId);
         return userStorage
                 .getUsersByTheSpecifiedIds(friendStorage.getMutualFriendsOfUsers(userId, otherId));
     }

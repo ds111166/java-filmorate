@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.time.LocalDate;
@@ -55,14 +56,22 @@ class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(1990, 1, 1)).build());
         assertNotNull(film1, "При создании фильма получен NULL");
         assertEquals(film1.getId(), 1, "Созданному фильму присвоен не верный id: " + film1.getId());
-        Film film2 = filmStorage.crateFilm(Film.builder().name("Name2").description("this film2").duration(100)
-                .releaseDate(LocalDate.of(1990, 2, 2)).mpaId(1).build());
+        Film film2 = filmStorage.crateFilm(Film.builder()
+                .name("Name2")
+                .description("this film2")
+                .duration(100)
+                .releaseDate(LocalDate.of(1990, 2, 2))
+                .mpa(new Mpa(1,null)).build());
         assertNotNull(film2, "При создании фильма получен NULL");
         assertEquals(film2.getId(), 2, "Созданному фильму присвоен не верный id: " + film2.getId());
         final NotFoundException exception = assertThrows(
                 NotFoundException.class,
-                () -> filmStorage.crateFilm(Film.builder().name("Name3").description("this film2").duration(110)
-                        .releaseDate(LocalDate.of(1990, 3, 3)).mpaId(9999).build()));
+                () -> filmStorage.crateFilm(Film.builder()
+                        .name("Name3")
+                        .description("this film2")
+                        .duration(110)
+                        .releaseDate(LocalDate.of(1990, 3, 3))
+                        .mpa(new Mpa(9999,null)).build()));
         assertTrue(Objects.requireNonNull(exception.getMessage()).contains("рейтинга MPA с id = 9999 нет"),
                 "При попытке создания фильма с не верным id MPA получено не верное исключение");
     }
@@ -79,7 +88,7 @@ class FilmDbStorageTest {
         film1.setDuration(film1.getDuration() + 15);
         film1.setReleaseDate(film1.getReleaseDate().plusDays(10));
         film1.setGenreIds(Arrays.asList(1, 2, 3));
-        film1.setMpaId(4);
+        film1.setMpa(new Mpa(4, null));
         filmStorage.updateFilm(film1);
         final Film film2 = filmStorage.getFilmById(film1.getId());
         assertEquals(film1.getId(), film2.getId(),
@@ -92,8 +101,8 @@ class FilmDbStorageTest {
                 "Метод обновления фильма вернул фильм с неверной датой выхода: " + film2.getReleaseDate());
         assertEquals(120 + 15, film2.getDuration(),
                 "Метод обновления фильма вернул фильм с неверной длительностью: " + film2.getDuration());
-        assertEquals(film1.getMpaId(), film2.getMpaId(),
-                "Метод обновления фильма вернул фильм с неверным idMpa : " + film2.getMpaId());
+        assertEquals(film1.getMpa().getId(), film2.getMpa().getId(),
+                "Метод обновления фильма вернул фильм с неверным idMpa : " + film2.getMpa().getId());
         assertTrue(film1.getGenreIds().containsAll(film2.getGenreIds()),
                 "Метод обновления фильма вернул фильм с неверным списком ids жанров: " + film2.getGenreIds());
         film2.setId(9999L);
@@ -111,7 +120,7 @@ class FilmDbStorageTest {
     void getFilmByIdTest() {
         Film film1 = filmStorage.crateFilm(Film.builder().name("Name1").description("this film1").duration(120)
                 .releaseDate(LocalDate.of(1990, 1, 1))
-                .genreIds(Arrays.asList(1, 2, 3)).mpaId(4).build());
+                .genreIds(Arrays.asList(1, 2, 3)).mpa(new Mpa(4, null)).build());
         assertNotNull(film1, "При создании фильма получен NULL");
         assertEquals(film1.getId(), 1, "Созданному фильму присвоен не верный id: " + film1.getId());
         final Film film2 = filmStorage.getFilmById(film1.getId());
@@ -125,8 +134,8 @@ class FilmDbStorageTest {
                 "Метод получения фильма по id вернул фильм с неверной датой выхода: " + film2.getReleaseDate());
         assertEquals(film1.getDuration(), film2.getDuration(),
                 "Метод получения фильма по id вернул фильм с неверной длительностью: " + film2.getDuration());
-        assertEquals(film1.getMpaId(), film2.getMpaId(),
-                "Метод получения фильма по id вернул фильм с неверным idMpa : " + film2.getMpaId());
+        assertEquals(film1.getMpa().getId(), film2.getMpa().getId(),
+                "Метод получения фильма по id вернул фильм с неверным idMpa : " + film2.getMpa().getId());
         assertTrue(film1.getGenreIds().containsAll(film2.getGenreIds()),
                 "Метод получения фильма по id вернул фильм с неверным списком ids жанров: " + film2.getGenreIds());
 

@@ -24,11 +24,9 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма должна быть положительной")
     private Integer duration;
-
-    private Integer mpaId;
+    private Mpa mpa;
     @Builder.Default
-    @NotNull
-    private List<Integer> genreIds = new ArrayList<>();
+    private List<Genre> genres = new ArrayList<>();
     /*
     Из ТЗ: getFilmGenreIdsByFilmId - получить идентификаторы жанров фильма по идентификатору фильма
     При создании и получении фильмов передать список идентификаторов жанров и идентификатор рейтинга.

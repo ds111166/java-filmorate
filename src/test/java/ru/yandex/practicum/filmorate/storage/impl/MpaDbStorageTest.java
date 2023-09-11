@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.service.MpaService;
 import ru.yandex.practicum.filmorate.storage.MpaStorage;
 
 import java.util.Map;
@@ -20,13 +21,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class MpaDbStorageTest {
-    @Qualifier("mpaDbStorage")
-    private final MpaStorage mpaStorage;
+    private final MpaService mpaService;
 
     @Test
-        //@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+    //@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
     void getMpasTest() {
-        final Map<Integer, String> idToMpa = mpaStorage.getMpas().stream()
+        final Map<Integer, String> idToMpa = mpaService.getMpas().stream()
                 .collect(Collectors.toMap(Mpa::getId, Mpa::getName, (a, b) -> b));
         assertEquals(idToMpa.size(), 5, "Не верное количество рейтингов MPA получено");
         assertEquals(idToMpa.get(1), "G", "Не верный рейтинг с id=1 получен: " + idToMpa.get(1));
@@ -37,14 +37,14 @@ class MpaDbStorageTest {
     }
 
     @Test
-    void getMpaByIdTast() {
-        final Mpa mpa = mpaStorage.getMpaById(1);
+    void getMpaByIdTest() {
+        final Mpa mpa = mpaService.getMpaById(1);
         assertEquals(mpa.getId(), 1, "По id=1 получен рейтинг MPA с id = " + mpa.getId());
         assertEquals(mpa.getName(), "G",
                 "по id=1 получен рейтинг MPA с не верным наименованием name: " + mpa.getName());
         final NotFoundException exception = assertThrows(
                 NotFoundException.class,
-                () -> mpaStorage.getMpaById(9999));
+                () -> mpaService.getMpaById(9999));
         assertEquals("рейтинга MPA с id = 9999 нет",
                 exception.getMessage(),
                 "При попытке получить рейтинг MPA по не верному id получено не верное сообщение");
