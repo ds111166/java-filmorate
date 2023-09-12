@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
@@ -61,7 +62,7 @@ class FilmDbStorageTest {
                 .description("this film2")
                 .duration(100)
                 .releaseDate(LocalDate.of(1990, 2, 2))
-                .mpa(new Mpa(1,null)).build());
+                .mpa(new Mpa(1, null)).build());
         assertNotNull(film2, "При создании фильма получен NULL");
         assertEquals(film2.getId(), 2, "Созданному фильму присвоен не верный id: " + film2.getId());
         final NotFoundException exception = assertThrows(
@@ -71,7 +72,7 @@ class FilmDbStorageTest {
                         .description("this film2")
                         .duration(110)
                         .releaseDate(LocalDate.of(1990, 3, 3))
-                        .mpa(new Mpa(9999,null)).build()));
+                        .mpa(new Mpa(9999, null)).build()));
         assertTrue(Objects.requireNonNull(exception.getMessage()).contains("рейтинга MPA с id = 9999 нет"),
                 "При попытке создания фильма с не верным id MPA получено не верное исключение");
     }
@@ -87,7 +88,7 @@ class FilmDbStorageTest {
         film1.setDescription(film1.getDescription() + " ч.2");
         film1.setDuration(film1.getDuration() + 15);
         film1.setReleaseDate(film1.getReleaseDate().plusDays(10));
-        film1.setGenreIds(Arrays.asList(1, 2, 3));
+        film1.setGenres(Stream.of(1, 2, 3).map(id -> Genre.builder().id(id).build()).collect(Collectors.toList()));
         film1.setMpa(new Mpa(4, null));
         filmStorage.updateFilm(film1);
         final Film film2 = filmStorage.getFilmById(film1.getId());
@@ -103,8 +104,10 @@ class FilmDbStorageTest {
                 "Метод обновления фильма вернул фильм с неверной длительностью: " + film2.getDuration());
         assertEquals(film1.getMpa().getId(), film2.getMpa().getId(),
                 "Метод обновления фильма вернул фильм с неверным idMpa : " + film2.getMpa().getId());
-        assertTrue(film1.getGenreIds().containsAll(film2.getGenreIds()),
-                "Метод обновления фильма вернул фильм с неверным списком ids жанров: " + film2.getGenreIds());
+        final Set<Integer> genreIds1 = film1.getGenres().stream().map(Genre::getId).collect(Collectors.toSet());
+        final Set<Integer> genreIds2 = film2.getGenres().stream().map(Genre::getId).collect(Collectors.toSet());
+        assertTrue(genreIds1.containsAll(genreIds2),
+                "Метод обновления фильма вернул фильм с неверным списком ids жанров: " + film2.getGenres());
         film2.setId(9999L);
         final NotFoundException exception = assertThrows(
                 NotFoundException.class,
@@ -118,9 +121,11 @@ class FilmDbStorageTest {
     @Test
     @Sql(scripts = {"classpath:test/clearing.sql"})
     void getFilmByIdTest() {
+        final List<Genre> genres = Stream.of(1, 2, 3)
+                .map(id -> new Genre(id, null)).collect(Collectors.toList());
         Film film1 = filmStorage.crateFilm(Film.builder().name("Name1").description("this film1").duration(120)
                 .releaseDate(LocalDate.of(1990, 1, 1))
-                .genreIds(Arrays.asList(1, 2, 3)).mpa(new Mpa(4, null)).build());
+                .genres(genres).mpa(new Mpa(4, null)).build());
         assertNotNull(film1, "При создании фильма получен NULL");
         assertEquals(film1.getId(), 1, "Созданному фильму присвоен не верный id: " + film1.getId());
         final Film film2 = filmStorage.getFilmById(film1.getId());
@@ -136,8 +141,11 @@ class FilmDbStorageTest {
                 "Метод получения фильма по id вернул фильм с неверной длительностью: " + film2.getDuration());
         assertEquals(film1.getMpa().getId(), film2.getMpa().getId(),
                 "Метод получения фильма по id вернул фильм с неверным idMpa : " + film2.getMpa().getId());
-        assertTrue(film1.getGenreIds().containsAll(film2.getGenreIds()),
-                "Метод получения фильма по id вернул фильм с неверным списком ids жанров: " + film2.getGenreIds());
+        final Set<Integer> genreIds1 = film1.getGenres().stream().map(Genre::getId).collect(Collectors.toSet());
+        final Set<Integer> genreIds2 = film2.getGenres().stream().map(Genre::getId).collect(Collectors.toSet());
+        assertTrue(genreIds1.containsAll(genreIds2),
+                "Метод получения фильма по id вернул фильм с неверным списком ids жанров: "
+                        + film2.getGenres());
 
         final NotFoundException exception = assertThrows(
                 NotFoundException.class,
@@ -155,7 +163,7 @@ class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(1990, 2, 2)).build());
         Film film3 = filmStorage.crateFilm(Film.builder().name("Name3").description("this film3").duration(110)
                 .releaseDate(LocalDate.of(1990, 3, 3)).build());
-        Film film4 = filmStorage.crateFilm(Film.builder().name("Name4").description("this film4").duration(115)
+        filmStorage.crateFilm(Film.builder().name("Name4").description("this film4").duration(115)
                 .releaseDate(LocalDate.of(1990, 4, 4)).build());
 
         Map<Long, Film> newFilms = Stream.of(film1, film2, film3)

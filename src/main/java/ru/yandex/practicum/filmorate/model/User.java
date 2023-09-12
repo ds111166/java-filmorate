@@ -19,7 +19,7 @@ public class User {
     private String login;
     private String name;
     @NotBlank(message = "Электронная почта не может быть пустой")
-    @Email(message = "Электронная почта должна соответствовать принятым правлам")
+    @Email(message = "Электронная почта должна соответствовать принятым правилам")
     private String email;
     @NotNull
     @Past(message = "Дата рождения должна быть ранее текущей даты")

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,13 +26,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 //@WebMvcTest(UserController.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class UserControllerTest {
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private MockMvc mockMvc;
+    private final ObjectMapper objectMapper;
+    private final MockMvc mockMvc;
 
     @Test
     public void shouldFirstGetUsers() throws Exception {
@@ -41,7 +40,7 @@ class UserControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         String response = mvcResult.getResponse().getContentAsString();
-        List<User> users = objectMapper.readValue(response, new TypeReference<List<User>>() {
+        List<User> users = objectMapper.readValue(response, new TypeReference<>() {
         });
         assertEquals(users.size(), 0, "Неверное количество созданных пользователей!");
         List<User> newUsers = new ArrayList<>();
@@ -78,14 +77,12 @@ class UserControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         response = mvcResult.getResponse().getContentAsString();
-        users = objectMapper.readValue(response, new TypeReference<List<User>>() {
+        users = objectMapper.readValue(response, new TypeReference<>() {
         });
         final List<Long> usersIds = users.stream().map(User::getId).collect(Collectors.toList());
         final List<Long> newUserIds = newUsers.stream().map(User::getId).collect(Collectors.toList());
         assertEquals(usersIds.size(), newUserIds.size(), "количество созданных пользователей не корректно");
-        assertTrue(usersIds.containsAll(newUserIds), "не верный список идентификаторо пользователей");
-        //List<MyClass> myObjects = mapper.readValue(jsonInput, mapper.getTypeFactory().constructCollectionType(List.class, MyClass.class));
-        //MyClass[] myObjects = mapper.readValue(json, MyClass[].class);
+        assertTrue(usersIds.containsAll(newUserIds), "не верный список идентификатор пользователей");
     }
 
     @Test
@@ -123,7 +120,7 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newUser)))
                 .andExpect(status().isBadRequest());
-        newUser.setEmail("aser_er.nero.cum@");
+        newUser.setEmail("as_er_er.nero.cum@");
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newUser)))

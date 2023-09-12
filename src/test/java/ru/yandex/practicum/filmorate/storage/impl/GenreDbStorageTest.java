@@ -3,13 +3,11 @@ package ru.yandex.practicum.filmorate.storage.impl;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.GenreService;
-import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class GenreDbStorageTest {
 
     private final GenreService genreService;
+
     @Test
     void getGenresTest() {
         final Map<Integer, String> idToGenre = genreService.getGenres().stream()

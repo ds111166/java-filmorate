@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,11 +26,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 //@WebMvcTest(FilmController.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FilmControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
+
+    private final MockMvc mockMvc;
+    private final ObjectMapper objectMapper;
 
     @Test
     public void shouldFirstGetFilms() throws Exception {
@@ -38,9 +39,10 @@ public class FilmControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON)).andReturn();
         String response = mvcResult.getResponse().getContentAsString();
-        List<Film> films = objectMapper.readValue(response, new TypeReference<List<Film>>() {
+        List<Film> films = objectMapper.readValue(response, new TypeReference<>() {
         });
         assertEquals(films.size(), 0, "Неверное количество созданных фильмов!");
+
         List<Film> newFilms = new ArrayList<>();
         newFilms.add(Film.builder()
                 .name("Name1")
@@ -75,12 +77,12 @@ public class FilmControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
         response = mvcResult.getResponse().getContentAsString();
-        films = objectMapper.readValue(response, new TypeReference<List<Film>>() {
+        films = objectMapper.readValue(response, new TypeReference<>() {
         });
         final List<Long> filmsIds = films.stream().map(Film::getId).collect(Collectors.toList());
         final List<Long> newFilmIds = newFilms.stream().map(Film::getId).collect(Collectors.toList());
         assertEquals(filmsIds.size(), newFilmIds.size(), "количество созданных фильмов не корректно");
-        assertTrue(filmsIds.containsAll(newFilmIds), "не верный список идентификаторо фильмов");
+        assertTrue(filmsIds.containsAll(newFilmIds), "не верный список идентификатор фильмов");
 
     }
 
@@ -142,7 +144,7 @@ public class FilmControllerTest {
     public void shouldNotCreateFilmWithReleaseDateEarlierThan_1895_12_28() throws Exception {
         Film newFilm = Film.builder()
                 .name("Name")
-                .description("date reliase film  < 1895.12.28")
+                .description("date release film  < 1895.12.28")
                 .duration(120)
                 .releaseDate(LocalDate.of(1895, 12, 27))
                 .build();
@@ -169,7 +171,7 @@ public class FilmControllerTest {
     public void shouldCreateAndUpdateFilm() throws Exception {
         Film newFilm = Film.builder()
                 .name("Name")
-                .description("film desription")
+                .description("film description")
                 .duration(10)
                 .releaseDate(LocalDate.of(1995, 12, 27))
                 .build();
@@ -179,7 +181,7 @@ public class FilmControllerTest {
                         .content(objectMapper.writeValueAsString(newFilm)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Name"))
-                .andExpect(jsonPath("$.description").value("film desription"))
+                .andExpect(jsonPath("$.description").value("film description"))
                 .andExpect(jsonPath("$.duration").value(10))
                 .andExpect(jsonPath("$.releaseDate").value("1995-12-27"));
 
@@ -190,7 +192,7 @@ public class FilmControllerTest {
         resultActions.andExpect(jsonPath("$.id").value(filmId));
 
         newFilm.setId(filmId);
-        newFilm.setDescription("film upadate");
+        newFilm.setDescription("film update");
         newFilm.setDuration(100);
         newFilm.setReleaseDate(LocalDate.of(1995, 12, 30));
         mockMvc.perform(put("/films")
@@ -199,16 +201,16 @@ public class FilmControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(filmId))
                 .andExpect(jsonPath("$.name").value("Name"))
-                .andExpect(jsonPath("$.description").value("film upadate"))
+                .andExpect(jsonPath("$.description").value("film update"))
                 .andExpect(jsonPath("$.duration").value(100))
                 .andExpect(jsonPath("$.releaseDate").value("1995-12-30"));
     }
 
     @Test
-    public void shouldCreateAndupdateFilm_recordNotFound() throws Exception {
+    public void shouldCreateAndUpdateFilm_recordNotFound() throws Exception {
         Film newFilm = Film.builder()
                 .name("Name")
-                .description("film desription")
+                .description("film description")
                 .duration(10)
                 .releaseDate(LocalDate.of(1995, 12, 27))
                 .build();
@@ -218,7 +220,7 @@ public class FilmControllerTest {
                         .content(objectMapper.writeValueAsString(newFilm)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Name"))
-                .andExpect(jsonPath("$.description").value("film desription"))
+                .andExpect(jsonPath("$.description").value("film description"))
                 .andExpect(jsonPath("$.duration").value(10))
                 .andExpect(jsonPath("$.releaseDate").value("1995-12-27"));
 
@@ -229,7 +231,7 @@ public class FilmControllerTest {
         resultActions.andExpect(jsonPath("$.id").value(filmId));
 
         newFilm.setId(999888L);
-        newFilm.setDescription("film upadate");
+        newFilm.setDescription("film update");
         newFilm.setDuration(100);
         newFilm.setReleaseDate(LocalDate.of(1995, 12, 30));
         mockMvc.perform(put("/films")

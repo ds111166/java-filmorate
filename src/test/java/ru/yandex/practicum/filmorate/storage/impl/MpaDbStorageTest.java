@@ -3,13 +3,11 @@ package ru.yandex.practicum.filmorate.storage.impl;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.MpaService;
-import ru.yandex.practicum.filmorate.storage.MpaStorage;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,7 +22,7 @@ class MpaDbStorageTest {
     private final MpaService mpaService;
 
     @Test
-    //@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+        //@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
     void getMpasTest() {
         final Map<Integer, String> idToMpa = mpaService.getMpas().stream()
                 .collect(Collectors.toMap(Mpa::getId, Mpa::getName, (a, b) -> b));

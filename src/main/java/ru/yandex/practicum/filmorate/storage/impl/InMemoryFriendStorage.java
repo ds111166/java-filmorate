@@ -22,7 +22,6 @@ public class InMemoryFriendStorage implements FriendStorage {
     private final UserStorage userStorage;
 
     private final Map<Friendship, Integer> friendships = new HashMap<>();
-    ;
 
     @Override
     public void addFriend(long userId, long friendId) {

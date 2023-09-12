@@ -1,20 +1,17 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.storage.LikeStorage;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Component("inMemoryLikeStorage")
+@RequiredArgsConstructor
 public class InMemoryLikeStorage implements LikeStorage {
 
     private final Set<Like> likes;
-
-    public InMemoryLikeStorage(Set<Like> likes) {
-        this.likes = new HashSet<>();
-    }
 
     @Override
     public Set<Like> getLikes() {

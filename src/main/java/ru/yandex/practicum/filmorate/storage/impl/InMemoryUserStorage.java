@@ -1,24 +1,24 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
 @Component("inMemoryUserStorage")
+@RequiredArgsConstructor
 public class InMemoryUserStorage implements UserStorage {
 
-    private long generatorId;
+    private long generatorId = 0;
     private final Map<Long, User> users;
-
-    public InMemoryUserStorage() {
-        this.generatorId = 0;
-        this.users = new HashMap<>();
-    }
 
     @Override
     public List<User> getUsers() {
