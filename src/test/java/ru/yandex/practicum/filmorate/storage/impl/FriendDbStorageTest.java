@@ -134,7 +134,6 @@ class FriendDbStorageTest {
     @Sql(scripts = {"classpath:test/clearing.sql"})
     void getMutualFriendsOfUsersTest() {
         addFriendTest();
-        //friendStorage.addFriend(1L, 1L);
         final User user1 = userService.getUserById(1L);
         final User user2 = userService.getUserById(2L);
         final User user3 = userService.getUserById(3L);

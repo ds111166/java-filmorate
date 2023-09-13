@@ -22,7 +22,6 @@ class MpaDbStorageTest {
     private final MpaService mpaService;
 
     @Test
-        //@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
     void getMpasTest() {
         final Map<Integer, String> idToMpa = mpaService.getMpas().stream()
                 .collect(Collectors.toMap(Mpa::getId, Mpa::getName, (a, b) -> b));
