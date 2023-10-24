@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
@@ -13,7 +12,10 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,18 +40,12 @@ public class ReviewDbStorage implements ReviewStorage {
             ps.setLong(3, newReview.getUserId());
             ps.setLong(4, newReview.getFilmId());
             final Integer useful = newReview.getUseful();
-            if(useful == null) {
-                ps.setInt(5, 0);
-            } else {
-                ps.setInt(5, newReview.getUseful());
-            }
+            ps.setInt(5, (useful == null) ? 0 : useful);
             return ps;
         };
         jdbcTemplate.update(preparedStatementCreator, keyHolder);
         final int reviewId = Objects.requireNonNull(keyHolder.getKey()).intValue();
-        //newReview.setId(reviewId);
-        final Review reviewById = getReviewById(reviewId);
-        return reviewById;
+        return getReviewById(reviewId);
     }
 
     @Override
@@ -82,18 +78,30 @@ public class ReviewDbStorage implements ReviewStorage {
             throw new NotFoundException(String.format("Отзыва с id: %s не существует", reviewId));
         }
     }
+
     @Override
     @Transactional
     public List<Review> getReviews(Long filmId, Integer count) {
-        final String sqlAll = "SELECT * FROM reviews LIMIT ?;";
-        final String sqlByFilmId = "SELECT * FROM reviews WHERE film_id = ? LIMIT ?;";
-        if(filmId == null) {
+        final String sqlAll = "SELECT * FROM reviews ORDER BY useful DESC LIMIT ?;";
+        final String sqlByFilmId = "SELECT * FROM reviews WHERE film_id = ? ORDER BY useful DESC LIMIT ?;";
+        if (filmId == null) {
             return jdbcTemplate.query(sqlAll, new Object[]{count},
                     new int[]{Types.INTEGER}, (rs, rowNum) -> makeReview(rs));
         }
         return jdbcTemplate.query(sqlByFilmId, new Object[]{filmId, count},
                 new int[]{Types.BIGINT, Types.INTEGER}, (rs, rowNum) -> makeReview(rs));
     }
+
+    @Override
+    public void changeUseful(Integer reviewId, int increment) {
+        final String sql = "UPDATE reviews SET useful=useful+? WHERE id=?;";
+        int numberOfRecordsAffected = jdbcTemplate.update(sql, increment, reviewId);
+        if (numberOfRecordsAffected == 0) {
+            throw new NotFoundException(String.format("Отзыва с id: %s не существует",
+                    reviewId));
+        }
+    }
+
 
     private Review makeReview(ResultSet rs) throws SQLException {
         return Review.builder()

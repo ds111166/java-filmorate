@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 import ru.yandex.practicum.filmorate.validation.Marker;
 
@@ -22,6 +21,7 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewService reviewService;
+
     @PostMapping
     @Validated({Marker.OnCreate.class})
     @ResponseStatus(HttpStatus.CREATED)
@@ -49,6 +49,7 @@ public class ReviewController {
         reviewService.deleteReview(id);
         log.info("Удален отзыв с id: {}", id);
     }
+
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Review getReviewById(@PathVariable("id") @NotNull Integer reviewId) {
@@ -57,6 +58,7 @@ public class ReviewController {
         log.info("Отправлен - {}", reviewById);
         return reviewById;
     }
+
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<Review> getReviews(@RequestParam(value = "filmId", required = false) Long filmId,
@@ -87,6 +89,7 @@ public class ReviewController {
         reviewService.deleteLike(id, userId);
         log.info("Удалён 'лайк' отзыву с id: {} от пользователя с id: {}", id, userId);
     }
+
     @DeleteMapping("/{id}/dislike/{userId}")
     public void deleteDislike(@PathVariable("id") @NotNull Integer id, @PathVariable("userId") @NotNull Long userId) {
         log.info("Запрос на удаление 'дизлайк' отзыву с id: {} от пользователя с id: {}", id, userId);

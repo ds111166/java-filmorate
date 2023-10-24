@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.List;
 
@@ -15,7 +15,6 @@ import java.util.List;
 public class ReviewService {
     private static final int LIKE = 1;
     private static final int DISLIKE = -1;
-
 
     private final ReviewStorage reviewStorage;
     @Qualifier("userDbStorage")
@@ -33,10 +32,10 @@ public class ReviewService {
         final Review updatedReview = reviewStorage.getReviewById(updateReviewData.getReviewId());
 
         final Boolean isPositive = updateReviewData.getIsPositive();
-        if(isPositive != null) {
+        if (isPositive != null) {
             updatedReview.setIsPositive(isPositive);
         }
-        if(updateReviewData.getContent()!=null) {
+        if (updateReviewData.getContent() != null) {
             updatedReview.setContent(updateReviewData.getContent());
         }
         return reviewStorage.updateReview(updatedReview);
@@ -55,22 +54,23 @@ public class ReviewService {
     }
 
     public void addLike(Integer reviewId, Long userId) {
-        userStorage.getUserById(userId);
-        reviewStorage.getReviewById(reviewId);
-        reviewStorage.addLike(reviewId, userId);
+        changeUseful(reviewId, userId, LIKE);
     }
 
     public void addDislike(Integer reviewId, Long userId) {
-        userStorage.getUserById(userId);
-        reviewStorage.getReviewById(reviewId);
-        reviewStorage.addDislike(reviewId, userId);
+        changeUseful(reviewId, userId, DISLIKE);
     }
-
     public void deleteLike(Integer reviewId, Long userId) {
         addDislike(reviewId, userId);
     }
 
     public void deleteDislike(Integer reviewId, Long userId) {
         addLike(reviewId, userId);
+    }
+
+    private void changeUseful(Integer reviewId, Long userId, int increment) {
+        userStorage.getUserById(userId);
+        reviewStorage.getReviewById(reviewId);
+        reviewStorage.changeUseful(reviewId, increment);
     }
 }
