@@ -44,7 +44,7 @@ public class ReviewDbStorage implements ReviewStorage {
             return ps;
         };
         jdbcTemplate.update(preparedStatementCreator, keyHolder);
-        final int reviewId = Objects.requireNonNull(keyHolder.getKey()).intValue();
+        final long reviewId = Objects.requireNonNull(keyHolder.getKey()).longValue();
         return getReviewById(reviewId);
     }
 
@@ -62,14 +62,14 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     @Transactional
-    public void deleteReview(Integer reviewId) {
+    public void deleteReview(Long reviewId) {
         final String sql = "DELETE FROM reviews WHERE id=?;";
         jdbcTemplate.update(sql, reviewId);
     }
 
     @Override
     @Transactional
-    public Review getReviewById(Integer reviewId) {
+    public Review getReviewById(Long reviewId) {
         final String sql = "SELECT * FROM reviews WHERE id = ?;";
         try {
             return jdbcTemplate.queryForObject(sql, new Object[]{reviewId},
@@ -93,7 +93,7 @@ public class ReviewDbStorage implements ReviewStorage {
     }
 
     @Override
-    public void changeUseful(Integer reviewId, int increment) {
+    public void changeUseful(Long reviewId, int increment) {
         final String sql = "UPDATE reviews SET useful=useful+? WHERE id=?;";
         int numberOfRecordsAffected = jdbcTemplate.update(sql, increment, reviewId);
         if (numberOfRecordsAffected == 0) {
@@ -105,7 +105,7 @@ public class ReviewDbStorage implements ReviewStorage {
 
     private Review makeReview(ResultSet rs) throws SQLException {
         return Review.builder()
-                .reviewId(rs.getInt("id"))
+                .reviewId(rs.getLong("id"))
                 .content(rs.getString("content"))
                 .isPositive(rs.getBoolean("is_positive"))
                 .userId(rs.getLong("user_id"))

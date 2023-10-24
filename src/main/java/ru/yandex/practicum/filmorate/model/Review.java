@@ -12,7 +12,7 @@ import javax.validation.constraints.Null;
 public class Review {
     @Null(groups = Marker.OnCreate.class)
     @NotNull(groups = Marker.OnUpdate.class)
-    private Integer reviewId;
+    private Long reviewId;
     @NotNull(groups = Marker.OnCreate.class, message = "Контент отзыва не должен быть пустым")
     private String content;
     @NotNull(groups = Marker.OnCreate.class)

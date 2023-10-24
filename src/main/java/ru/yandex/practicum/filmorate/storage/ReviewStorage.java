@@ -9,11 +9,11 @@ public interface ReviewStorage {
 
     Review updateReview(Review updateReview);
 
-    void deleteReview(Integer id);
+    void deleteReview(Long reviewId);
 
-    Review getReviewById(Integer reviewId);
+    Review getReviewById(Long reviewId);
 
     List<Review> getReviews(Long filmId, Integer count);
 
-    void changeUseful(Integer reviewId, int increment);
+    void changeUseful(Long reviewId, int increment);
 }

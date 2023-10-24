@@ -14,3 +14,12 @@ select 4, 'Триллер' union
 select 5, 'Документальный' union
 select 6, 'Боевик')
 x where not exists(select * from genres);
+
+merge into operations key(id) values
+(1, 'ADD'),
+(2, 'REMOVE'),
+(3, 'UPDATE');
+merge into events_types key(id) values
+(1, 'LIKE'),
+(2, 'REVIEW'),
+(3, 'FRIEND');
