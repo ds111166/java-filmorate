@@ -1,25 +1,21 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component("inMemoryFilmStorage")
+@RequiredArgsConstructor
 public class InMemoryFilmStorage implements FilmStorage {
-    protected long generatorId;
+    protected long generatorId = 0;
     protected final Map<Long, Film> films;
-
-    public InMemoryFilmStorage() {
-        this.generatorId = 0;
-        this.films = new HashMap<>();
-    }
 
     @Override
     public List<Film> getFilms() {
@@ -31,6 +27,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.values().stream()
                 .filter(film -> ids.contains(film.getId()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Film> getRecommendationsForUser(Long userId) {
+        return null;
     }
 
     @Override
