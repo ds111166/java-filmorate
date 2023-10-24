@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.data.EventType;
 import ru.yandex.practicum.filmorate.data.Operation;
 import ru.yandex.practicum.filmorate.model.Event;
@@ -19,6 +20,7 @@ public class EventDbStorage implements EventStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
+    @Transactional
     public void createEvent(Event event) {
         final String sql = "INSERT INTO feed (user_id, timestamp, type_id, operation_id, entity_id) VALUES (?, ?, ?, ?, ?);";
         jdbcTemplate.update(
@@ -32,6 +34,7 @@ public class EventDbStorage implements EventStorage {
     }
 
     @Override
+    @Transactional
     public List<Event> getFeed(long userId) {
         final String sql = "SELECT * FROM feed WHERE user_id = ?;";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeEvent(rs), userId);

@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.data.EventType;
 import ru.yandex.practicum.filmorate.data.Operation;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -21,6 +23,8 @@ public class UserService {
     private final UserStorage userStorage;
     @Qualifier("friendDbStorage")
     private final FriendStorage friendStorage;
+    @Qualifier("filmDbStorage")
+    private final FilmStorage filmStorage;
     private final EventService eventService;
 
 
@@ -65,5 +69,10 @@ public class UserService {
         userStorage.getUserById(otherId);
         return userStorage
                 .getUsersByTheSpecifiedIds(friendStorage.getMutualFriendsOfUsers(userId, otherId));
+    }
+
+    public List<Film> getRecommendations(Long userId) {
+        userStorage.getUserById(userId);
+        return filmStorage.getRecommendationsForUser(userId);
     }
 }

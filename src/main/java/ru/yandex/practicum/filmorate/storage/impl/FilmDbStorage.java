@@ -21,6 +21,7 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.MpaStorage;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -135,6 +136,35 @@ public class FilmDbStorage implements FilmStorage {
         films.forEach(film -> film.setGenres(filmGenreStorage.getFilmGenresByFilmId(film.getId())));
         return films;
     }
+
+    @Override
+    @Transactional
+    public List<Film> getRecommendationsForUser(Long userId) {
+        String sqlGetMaximumIntersection = "SELECT l.user_id as user_id FROM likes as l " +
+                "WHERE l.film_id in (SELECT film_id from likes l1 where l1.user_id = ?) " +
+                "AND l.user_id <> ? " +
+                "GROUP BY l.user_id " +
+                "ORDER BY count(l.film_id);";
+        String sqlGetRecommendations = "SELECT f.* FROM films as f " +
+                "WHERE f.id in " +
+                "(SELECT f1.id FROM films AS f1 LEFT JOIN likes AS l1 ON f1.id = l1.film_id " +
+                "WHERE l1.user_id = ? " +
+                "EXCEPT " +
+                "SELECT f2.id FROM films AS f2 LEFT JOIN likes AS l2 ON f2.id = l2.film_id " +
+                "WHERE l2.user_id = ?);";
+        final List<Long> userIds = jdbcTemplate.query(sqlGetMaximumIntersection,
+                (rs, rowNum) -> rs.getLong("user_id"), userId, userId);
+        for (Long id : userIds) {
+            List<Film> recommendedFilms = jdbcTemplate.query(sqlGetRecommendations,
+                    (rs, rowNum) -> makeFilm(rs), id, userId);
+            if (!recommendedFilms.isEmpty()) {
+                recommendedFilms.forEach(film -> film.setGenres(filmGenreStorage.getFilmGenresByFilmId(film.getId())));
+                return recommendedFilms;
+            }
+        }
+        return new ArrayList<>();
+    }
+
 
     private Film makeFilm(ResultSet rs) throws SQLException {
         return Film.builder()
