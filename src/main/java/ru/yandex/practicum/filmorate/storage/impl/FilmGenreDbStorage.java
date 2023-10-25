@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.FilmGenre;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -31,6 +32,7 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     private final GenreStorage genreStorage;
 
     @Override
+    @Transactional
     public void createFilmGenre(long filmId, List<Genre> genres) {
         if (genres == null || genres.isEmpty()) {
             return;
@@ -61,6 +63,7 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     }
 
     @Override
+    @Transactional
     public void deleteFilmGenre(long filmId, List<Genre> genres) {
         if (genres == null || genres.isEmpty()) {
             return;
@@ -81,6 +84,7 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     }
 
     @Override
+    @Transactional
     public List<Genre> getFilmGenresByFilmId(long filmId) {
         final String sql = "SELECT genre_id FROM film_genre WHERE film_id = ?;";
         final List<Integer> genreIds = jdbcTemplate.queryForList(sql,
@@ -91,6 +95,7 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     }
 
     @Override
+    @Transactional
     public List<Long> getFilmsIdsByGenreId(int genreId) {
         genreStorage.getGenreById(genreId);
         final String sql = "SELECT film_id FROM film_genre WHERE genre_id = ?;";

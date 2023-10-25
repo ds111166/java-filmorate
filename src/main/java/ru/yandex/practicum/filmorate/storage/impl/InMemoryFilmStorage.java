@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.data.SortType;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -31,6 +32,11 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getRecommendationsForUser(Long userId) {
+        return null;
+    }
+
+    @Override
+    public List<Film> getFilmsByDirectorId(Integer directorId, SortType sortBy) {
         return null;
     }
 

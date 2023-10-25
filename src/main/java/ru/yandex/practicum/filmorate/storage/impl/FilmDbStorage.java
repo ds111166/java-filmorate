@@ -12,10 +12,13 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.filmorate.data.SortType;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.FilmDirectorStorage;
 import ru.yandex.practicum.filmorate.storage.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.MpaStorage;
@@ -35,6 +38,7 @@ public class FilmDbStorage implements FilmStorage {
     private final FilmGenreStorage filmGenreStorage;
     @Qualifier("mpaDbStorage")
     private final MpaStorage mpaStorage;
+    private final FilmDirectorStorage filmDirectorStorage;
 
     @Override
     @Transactional
@@ -42,6 +46,7 @@ public class FilmDbStorage implements FilmStorage {
         final String sql = "SELECT id, \"name\", description, release_date, duration, mpa_id FROM films;";
         final List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs));
         films.forEach(film -> film.setGenres(filmGenreStorage.getFilmGenresByFilmId(film.getId())));
+        films.forEach(film -> film.setDirectors(filmDirectorStorage.getFilmDirectorByFilmId(film.getId())));
         return films;
     }
 
@@ -73,6 +78,8 @@ public class FilmDbStorage implements FilmStorage {
         newFilm.setId(filmId);
         final List<Genre> genres = newFilm.getGenres();
         filmGenreStorage.createFilmGenre(filmId, genres);
+        final List<Director> directors = newFilm.getDirectors();
+        filmDirectorStorage.createFilmDirector(filmId, directors);
         return getFilmById(filmId);
     }
 
@@ -105,8 +112,18 @@ public class FilmDbStorage implements FilmStorage {
         if (numberOfRecordsAffected == 0) {
             throw new NotFoundException(String.format("Фильма с id = %s нет", filmId));
         }
-        filmGenreStorage.deleteFilmGenre(filmId, filmGenreStorage.getFilmGenresByFilmId(filmId));
-        filmGenreStorage.createFilmGenre(filmId, updatedFilm.getGenres());
+        final List<Genre> genres = updatedFilm.getGenres();
+        if (genres != null) {
+            filmGenreStorage.deleteFilmGenre(filmId, filmGenreStorage.getFilmGenresByFilmId(filmId));
+            filmGenreStorage.createFilmGenre(filmId, genres);
+        }
+        final List<Director> directors = updatedFilm.getDirectors();
+        if (directors != null) {
+            filmDirectorStorage.deleteFilmDirector(filmId, filmDirectorStorage.getFilmDirectorByFilmId(filmId));
+            filmDirectorStorage.createFilmDirector(filmId, directors);
+        } else {
+            filmDirectorStorage.deleteFilmDirector(filmId, filmDirectorStorage.getFilmDirectorByFilmId(filmId));
+        }
         return getFilmById(updatedFilm.getId());
     }
 
@@ -119,6 +136,7 @@ public class FilmDbStorage implements FilmStorage {
                     new int[]{Types.BIGINT}, (rs, rowNum) -> makeFilm(rs));
             if (film != null) {
                 film.setGenres(filmGenreStorage.getFilmGenresByFilmId(filmId));
+                film.setDirectors(filmDirectorStorage.getFilmDirectorByFilmId(filmId));
             }
             return film;
         } catch (EmptyResultDataAccessException ex) {
@@ -134,6 +152,7 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "SELECT * FROM films WHERE id IN (:ids);";
         final List<Film> films = namedParameterJdbcTemplate.query(sql, parameters, (rs, rowNum) -> makeFilm(rs));
         films.forEach(film -> film.setGenres(filmGenreStorage.getFilmGenresByFilmId(film.getId())));
+        films.forEach(film -> film.setDirectors(filmDirectorStorage.getFilmDirectorByFilmId(film.getId())));
         return films;
     }
 
@@ -158,11 +177,41 @@ public class FilmDbStorage implements FilmStorage {
             List<Film> recommendedFilms = jdbcTemplate.query(sqlGetRecommendations,
                     (rs, rowNum) -> makeFilm(rs), id, userId);
             if (!recommendedFilms.isEmpty()) {
-                recommendedFilms.forEach(film -> film.setGenres(filmGenreStorage.getFilmGenresByFilmId(film.getId())));
+                recommendedFilms.forEach(film ->
+                        film.setGenres(filmGenreStorage.getFilmGenresByFilmId(film.getId())));
+                recommendedFilms.forEach(film ->
+                        film.setDirectors(filmDirectorStorage.getFilmDirectorByFilmId(film.getId())));
                 return recommendedFilms;
             }
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    public List<Film> getFilmsByDirectorId(Integer directorId, SortType sortBy) {
+        String sqlOrderByYear = "SELECT f.* FROM films AS f " +
+                "LEFT JOIN film_director AS fd ON fd.film_id = f.id " +
+                "WHERE fd.director_id = ? ORDER BY f.release_date;";
+        String sqlOrderByCountLike = "SELECT f.* FROM films AS f " +
+                "LEFT JOIN film_director AS fd ON fd.film_id = f.id " +
+                "WHERE fd.director_id = ? " +
+                "ORDER BY (SELECT count(*) FROM likes AS l WHERE l.film_id = f.id);";
+        StringBuilder sql = new StringBuilder();
+        switch (sortBy) {
+            case YEAR:
+                sql.append(sqlOrderByYear);
+                break;
+            case LIKES:
+                sql.append(sqlOrderByCountLike);
+                break;
+            default:
+                return new ArrayList<>();
+        }
+        final List<Film> films = jdbcTemplate.query(sql.toString(), new Object[]{directorId},
+                new int[]{Types.INTEGER}, (rs, rowNum) -> makeFilm(rs));
+        films.forEach(film -> film.setGenres(filmGenreStorage.getFilmGenresByFilmId(film.getId())));
+        films.forEach(film -> film.setDirectors(filmDirectorStorage.getFilmDirectorByFilmId(film.getId())));
+        return films;
     }
 
 
