@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.data.SortType;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.validation.Marker;
@@ -71,6 +72,7 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
+    @ResponseStatus(HttpStatus.OK)
     public void addLike(@PathVariable("id") @NotNull Long id, @PathVariable("userId") @NotNull Long userId) {
         log.info("Запрос на простановку лайка от пользователя с id: {} фильму с id: {}", userId, id);
         filmService.addLike(id, userId);
@@ -78,10 +80,20 @@ public class FilmController {
     }
 
     @DeleteMapping("/{id}/like/{userId}")
+    @ResponseStatus(HttpStatus.OK)
     public void deleteLike(@PathVariable("id") @NotNull Long id, @PathVariable("userId") @NotNull Long userId) {
         log.info("Запрос на удаления лайка от пользователя с id: {} фильму с id: {}", userId, id);
         filmService.deleteLike(id, userId);
         log.info("Пользователь с id: {} удалил лайк фильму с id: {}", userId, id);
     }
 
+    @GetMapping("/director/{directorId}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> getFilmsByDirectorId(@PathVariable("directorId") Integer directorId,
+                                           @RequestParam(value = "sortBy") SortType sortBy) {
+        log.info("Запрос на получение фильмов режиссера с id: {}, отсортированных по: {}", directorId, sortBy);
+        final List<Film> directorsFilms = filmService.getFilmsByDirectorId(directorId, sortBy);
+        log.info("Количество фильмов режиссера с id: {} равно: {}", directorId, directorsFilms.size());
+        return directorsFilms;
+    }
 }

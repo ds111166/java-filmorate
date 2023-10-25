@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.data.EventType;
 import ru.yandex.practicum.filmorate.data.Operation;
+import ru.yandex.practicum.filmorate.data.SortType;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -27,6 +28,7 @@ public class FilmService {
     @Qualifier("likeDbStorage")
     private final LikeStorage likeStorage;
     private final EventService eventService;
+    private final DirectorService directorService;
 
     public List<Film> getFilms() {
         return filmStorage.getFilms();
@@ -79,5 +81,10 @@ public class FilmService {
                         .map(Map.Entry::getKey)
                         .limit(count)
                         .collect(Collectors.toList()));
+    }
+
+    public List<Film> getFilmsByDirectorId(Integer directorId, SortType sortBy) {
+        directorService.getDirectorById(directorId);
+        return filmStorage.getFilmsByDirectorId(directorId, sortBy);
     }
 }

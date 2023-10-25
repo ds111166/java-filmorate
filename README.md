@@ -1,4 +1,14 @@
 # java-filmorate
+ТЕСТЫ(Номер тесте = номеру фичи):
+1. https://github.com/yandex-praktikum/java-filmorate/blob/add-reviews/postman/sprint.json
+2. https://github.com/yandex-praktikum/java-filmorate/blob/add-search/postman/sprint.json
+3. https://github.com/yandex-praktikum/java-filmorate/blob/add-common-films/postman/sprint.json
+4. https://github.com/yandex-praktikum/java-filmorate/blob/add-recommendations/postman/sprint.json
+5. https://github.com/yandex-praktikum/java-filmorate/blob/add-feed/postman/sprint.json
+6. https://github.com/yandex-praktikum/java-filmorate/blob/add-remove-endpoint/postman/sprint.json
+7. https://github.com/yandex-praktikum/java-filmorate/blob/add-director/postman/sprint.json
+8. https://github.com/yandex-praktikum/java-filmorate/blob/add-most-populars/postman/sprint.json
+9. ОБЩИЕ ТЕСТЫ https://github.com/yandex-praktikum/java-filmorate/blob/develop/postman/sprint.json
 
 #### Диаграмма
 
@@ -74,7 +84,7 @@
 }
 ]
 ```
-## add-director : Добавление режиссёров в фильмы.
+## **<span style="color:blue">_add-director : Добавление режиссёров в фильмы.</span>_**
 
 🎦 Ветка для реализации задачи должна называться `add-director`.
 
