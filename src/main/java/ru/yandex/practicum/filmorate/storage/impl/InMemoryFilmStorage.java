@@ -51,6 +51,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getTopPopularFilms(Integer count, Integer genreId, Integer year) {
+        return null;
+    }
+
+    @Override
     public Film getFilmById(Long filmId) {
         if (!films.containsKey(filmId)) {
             throw new NotFoundException(String.format("Фильма с id = %s нет", filmId));

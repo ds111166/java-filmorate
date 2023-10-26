@@ -45,10 +45,13 @@ public class FilmController {
     @GetMapping("/popular")
     @ResponseStatus(HttpStatus.OK)
     public List<Film> getTopPopularFilms(
-            @RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
-        log.info("Запрос на получение {} популярных фильмов", count);
-        final List<Film> topPopularFilms = filmService.getTopPopularFilms(count);
-        log.info("Отправлен список из {} популярных фильмов", topPopularFilms.size());
+            @RequestParam(value = "count", defaultValue = "10", required = false) Integer count,
+            @RequestParam(value = "genreId", required = false) Integer genreId,
+            @RequestParam(value = "year", required = false) Integer year) {
+        log.info("Запрос на получение {} популярных фильмов жанра с id: {} за {} год", count, genreId, year);
+        final List<Film> topPopularFilms = filmService.getTopPopularFilms(count, genreId, year);
+        log.info("Размер отправленного списка популярных фильмов жанра с id: {} за {} год равен {}",
+                genreId, year, topPopularFilms.size());
         return topPopularFilms;
     }
 

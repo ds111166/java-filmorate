@@ -7,16 +7,11 @@ import ru.yandex.practicum.filmorate.data.EventType;
 import ru.yandex.practicum.filmorate.data.Operation;
 import ru.yandex.practicum.filmorate.data.SortType;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -64,26 +59,8 @@ public class FilmService {
         eventService.createEvent(userId, EventType.LIKE, Operation.REMOVE, filmId);
     }
 
-    public List<Film> getTopPopularFilms(Integer count) {
-        Map<Long, Integer> filmIdToNumberLike = new HashMap<>();
-        for (Film film : filmStorage.getFilms()) {
-            filmIdToNumberLike.put(film.getId(), 0);
-        }
-        for (Like like : likeStorage.getLikes()) {
-            final long filmId = like.getFilmId();
-            if (filmIdToNumberLike.containsKey(filmId)) {
-                filmIdToNumberLike.put(filmId, filmIdToNumberLike.get(filmId) + 1);
-            } else {
-                filmIdToNumberLike.put(filmId, 1);
-            }
-        }
-
-        return filmStorage
-                .getFilmsByTheSpecifiedIds(filmIdToNumberLike.entrySet().stream()
-                        .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
-                        .map(Map.Entry::getKey)
-                        .limit(count)
-                        .collect(Collectors.toList()));
+    public List<Film> getTopPopularFilms(Integer count, Integer genreId, Integer year) {
+        return filmStorage.getTopPopularFilms(count, genreId, year);
     }
 
     public List<Film> getFilmsByDirectorId(Integer directorId, SortType sortBy) {
