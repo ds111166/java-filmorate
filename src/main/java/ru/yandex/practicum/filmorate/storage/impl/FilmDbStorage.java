@@ -188,6 +188,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    @Transactional
     public List<Film> getFilmsByDirectorId(Integer directorId, SortType sortBy) {
         String sqlOrderByYear = "SELECT f.* FROM films AS f " +
                 "LEFT JOIN film_director AS fd ON fd.film_id = f.id " +
@@ -215,6 +216,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    @Transactional
     public List<Film> getCommonFilms(Long userId, Long friendId) {
         String sql = "SELECT f.* FROM films AS f WHERE f.id IN (" +
                 "SELECT l1.film_id FROM likes AS l1 WHERE l1.user_id=? " +
@@ -227,6 +229,12 @@ public class FilmDbStorage implements FilmStorage {
         return films;
     }
 
+    @Override
+    @Transactional
+    public void deleteFilm(Long filmId) {
+        String sql = "DELETE FROM films WHERE id = ?;";
+        jdbcTemplate.update(sql, filmId);
+    }
 
     private Film makeFilm(ResultSet rs) throws SQLException {
         return Film.builder()

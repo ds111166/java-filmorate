@@ -89,13 +89,6 @@ public class FriendDbStorage implements FriendStorage {
                 Long.class));
     }
 
-    private Friendship makeFriendship(ResultSet rs) throws SQLException {
-        return Friendship.builder()
-                .user1Id(rs.getLong("user1_id"))
-                .user2Id(rs.getLong("user2_id"))
-                .direction(rs.getInt("direction")).build();
-    }
-
     private Friendship getFriendshipByIds(long user1Id, long user2Id) {
         final String sqlSelect = "SELECT * FROM friendships where user1_id = ? and user2_id = ?;";
         try {
@@ -104,6 +97,13 @@ public class FriendDbStorage implements FriendStorage {
         } catch (EmptyResultDataAccessException ex) {
             return null;
         }
+    }
+
+    private Friendship makeFriendship(ResultSet rs) throws SQLException {
+        return Friendship.builder()
+                .user1Id(rs.getLong("user1_id"))
+                .user2Id(rs.getLong("user2_id"))
+                .direction(rs.getInt("direction")).build();
     }
 
     private int calculateDirection(long user1Id, long userId, long friendId) {

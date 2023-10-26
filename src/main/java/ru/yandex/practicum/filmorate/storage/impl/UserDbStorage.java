@@ -94,6 +94,13 @@ public class UserDbStorage implements UserStorage {
         return namedParameterJdbcTemplate.query(sql, parameters, (rs, rowNum) -> makeUser(rs));
     }
 
+    @Override
+    @Transactional
+    public void deleteUser(Long userId) {
+        String sql = "DELETE FROM users WHERE id = ?;";
+        jdbcTemplate.update(sql, userId);
+    }
+
     private User makeUser(ResultSet rs) throws SQLException {
         return User.builder()
                 .id(rs.getLong("id"))

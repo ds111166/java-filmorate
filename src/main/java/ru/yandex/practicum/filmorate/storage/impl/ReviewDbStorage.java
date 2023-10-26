@@ -93,6 +93,7 @@ public class ReviewDbStorage implements ReviewStorage {
     }
 
     @Override
+    @Transactional
     public void changeUseful(Long reviewId, int increment) {
         final String sql = "UPDATE reviews SET useful=useful+? WHERE id=?;";
         int numberOfRecordsAffected = jdbcTemplate.update(sql, increment, reviewId);

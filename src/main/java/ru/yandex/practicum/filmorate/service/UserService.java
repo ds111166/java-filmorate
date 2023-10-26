@@ -75,4 +75,8 @@ public class UserService {
         userStorage.getUserById(userId);
         return filmStorage.getRecommendationsForUser(userId);
     }
+
+    public void deleteUser(Long userId) {
+        userStorage.deleteUser(userId);
+    }
 }

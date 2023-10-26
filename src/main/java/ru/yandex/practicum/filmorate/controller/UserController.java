@@ -82,7 +82,16 @@ public class UserController {
         return user;
     }
 
+    @DeleteMapping("/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteUser(@PathVariable("userId") @NotNull Long userId) {
+        log.info("Запрос на удаление пользователя с id: {}", userId);
+        userService.deleteUser(userId);
+        log.info("Пользователь с id: {} удален", userId);
+    }
+
     @PutMapping("/{id}/friends/{friendId}")
+    @ResponseStatus(HttpStatus.OK)
     public void addFriend(@PathVariable("id") @NotNull Long id, @PathVariable("friendId") @NotNull Long friendId) {
         log.info("Запрос на дружбу пользователей с id: {} и {}", id, friendId);
         userService.addFriend(id, friendId);
@@ -90,6 +99,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
+    @ResponseStatus(HttpStatus.OK)
     public void deleteFriend(@PathVariable("id") @NotNull Long id, @PathVariable("friendId") @NotNull Long friendId) {
         log.info("Запрос на удаление дружбы пользователей с id: {} и {}", id, friendId);
         userService.deleteFriend(id, friendId);
@@ -97,11 +107,13 @@ public class UserController {
     }
 
     @GetMapping("/{id}/feed")
+    @ResponseStatus(HttpStatus.OK)
     public List<Event> getFeed(@PathVariable Long id) {
         return eventService.getFeed(id);
     }
 
     @GetMapping("/{id}/recommendations")
+    @ResponseStatus(HttpStatus.OK)
     public List<Film> getRecommendations(@PathVariable("id") Long id) {
         return userService.getRecommendations(id);
     }

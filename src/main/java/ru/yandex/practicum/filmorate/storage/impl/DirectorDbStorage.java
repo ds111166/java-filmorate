@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
@@ -27,12 +28,14 @@ public class DirectorDbStorage implements DirectorStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
+    @Transactional
     public List<Director> getDirectors() {
         final String sql = "SELECT id, \"name\" FROM directors;";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeDirector(rs));
     }
 
     @Override
+    @Transactional
     public Director getDirectorById(Integer directorId) {
         final String sql = "SELECT id, \"name\" FROM directors where id = ?;";
         try {
@@ -44,6 +47,7 @@ public class DirectorDbStorage implements DirectorStorage {
     }
 
     @Override
+    @Transactional
     public Director crateDirector(Director newDirector) {
         final String sql = "INSERT INTO directors (\"name\") VALUES (?);";
         final KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -58,6 +62,7 @@ public class DirectorDbStorage implements DirectorStorage {
     }
 
     @Override
+    @Transactional
     public Director updateDirector(Director directorData) {
         final String sql = "UPDATE directors SET \"name\"=? WHERE id = ?";
         final Integer directorId = directorData.getId();
@@ -75,6 +80,7 @@ public class DirectorDbStorage implements DirectorStorage {
     }
 
     @Override
+    @Transactional
     public void deleteDirector(Integer directorId) {
         final String sql = "DELETE FROM directors where id = ?;";
         jdbcTemplate.update(sql, directorId);
