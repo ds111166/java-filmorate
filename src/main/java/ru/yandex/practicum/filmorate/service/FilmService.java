@@ -73,4 +73,9 @@ public class FilmService {
         userStorage.getUserById(friendId);
         return filmStorage.getCommonFilms(userId, friendId);
     }
+
+    public List<Film> searchFilms(String query, String by) {
+        final String[] split = by.split(",");
+        if(split)
+    }
 }

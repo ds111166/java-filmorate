@@ -119,4 +119,15 @@ public class FilmController {
                 userId, friendId, commonFilms.size());
         return commonFilms;
     }
+
+    @GetMapping("/search")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> searchFilms(@RequestParam(value = "query") String query,
+                                     @RequestParam(value = "friendId") String by) {
+        log.info("Запрос на поиск фильмов query: \"{}\", by: \"{}\"", query, by);
+        final List<Film> films = filmService.searchFilms(query, by);
+        log.info("По запросу: query: \"{}\", by: \"{}\" найдено фильмов: {}",
+                query, by, films.size());
+        return films;
+    }
 }
