@@ -236,6 +236,25 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sql, filmId);
     }
 
+    @Override
+    public List<Film> getTopPopularFilms(Integer count, Integer genreId, Integer year) {
+        String sql = "SELECT f.* FROM films AS f WHERE true %s %s " +
+                "ORDER BY (SELECT count(*) FROM likes AS l WHERE l.film_id = f.id) DESC " +
+                "LIMIT ?;";
+        String filterGenre = (genreId == null)
+                ? "AND true"
+                : "AND f.id IN (SELECT fg.film_id FROM film_genre AS fg WHERE fg.genre_id = "
+                + genreId + ")";
+        String filterYear = (year == null)
+                ? "AND true"
+                : "AND YEAR(f.release_date) = " + year;
+        sql = String.format(sql, filterGenre, filterYear);
+        final List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), count);
+        films.forEach(film -> film.setGenres(filmGenreStorage.getFilmGenresByFilmId(film.getId())));
+        films.forEach(film -> film.setDirectors(filmDirectorStorage.getFilmDirectorByFilmId(film.getId())));
+        return films;
+    }
+
     private Film makeFilm(ResultSet rs) throws SQLException {
         return Film.builder()
                 .id(rs.getLong("id"))
