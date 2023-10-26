@@ -5,12 +5,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.data.EventType;
 import ru.yandex.practicum.filmorate.data.Operation;
+import ru.yandex.practicum.filmorate.data.SearchType;
 import ru.yandex.practicum.filmorate.data.SortType;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -72,5 +75,11 @@ public class FilmService {
         userStorage.getUserById(userId);
         userStorage.getUserById(friendId);
         return filmStorage.getCommonFilms(userId, friendId);
+    }
+
+
+    public List<Film> searchFilms(String query, SearchType[] by) {
+
+        return filmStorage.searchFilms(query, new HashSet<>(Arrays.asList(by)));
     }
 }

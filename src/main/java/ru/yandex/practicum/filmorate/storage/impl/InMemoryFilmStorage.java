@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.data.SearchType;
 import ru.yandex.practicum.filmorate.data.SortType;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -10,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component("inMemoryFilmStorage")
@@ -52,6 +54,11 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getTopPopularFilms(Integer count, Integer genreId, Integer year) {
+        return null;
+    }
+
+    @Override
+    public List<Film> searchFilms(String query, Set<SearchType> searchTypes) {
         return null;
     }
 

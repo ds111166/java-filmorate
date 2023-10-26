@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.data.SearchType;
 import ru.yandex.practicum.filmorate.data.SortType;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -118,5 +119,16 @@ public class FilmController {
         log.info("Количество фильмов пользователей с userId: {} и friendId: {} равно: {}",
                 userId, friendId, commonFilms.size());
         return commonFilms;
+    }
+
+    @GetMapping("/search")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> searchFilms(@RequestParam(value = "query") String query,
+                                  @RequestParam(value = "by") SearchType[] by) {
+        log.info("Запрос на поиск фильмов query: \"{}\", by: \"{}\"", query, by);
+        final List<Film> films = filmService.searchFilms(query, by);
+        log.info("По запросу: query: \"{}\", by: \"{}\" найдено фильмов: {}",
+                query, by, films.size());
+        return films;
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.filmorate.data.SearchType;
 import ru.yandex.practicum.filmorate.data.SortType;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -27,6 +28,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+
+import static ru.yandex.practicum.filmorate.data.SearchType.DIRECTOR;
+import static ru.yandex.practicum.filmorate.data.SearchType.TITLE;
 
 @Component("filmDbStorage")
 @RequiredArgsConstructor
@@ -45,9 +50,7 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getFilms() {
         final String sql = "SELECT id, \"name\", description, release_date, duration, mpa_id FROM films;";
         final List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs));
-        films.forEach(film -> film.setGenres(filmGenreStorage.getFilmGenresByFilmId(film.getId())));
-        films.forEach(film -> film.setDirectors(filmDirectorStorage.getFilmDirectorByFilmId(film.getId())));
-        return films;
+        return addGenresAndDirectorsToFilms(films);
     }
 
     @Override
@@ -151,9 +154,7 @@ public class FilmDbStorage implements FilmStorage {
                 .addValue("ids", ids);
         String sql = "SELECT * FROM films WHERE id IN (:ids);";
         final List<Film> films = namedParameterJdbcTemplate.query(sql, parameters, (rs, rowNum) -> makeFilm(rs));
-        films.forEach(film -> film.setGenres(filmGenreStorage.getFilmGenresByFilmId(film.getId())));
-        films.forEach(film -> film.setDirectors(filmDirectorStorage.getFilmDirectorByFilmId(film.getId())));
-        return films;
+        return addGenresAndDirectorsToFilms(films);
     }
 
     @Override
@@ -177,11 +178,7 @@ public class FilmDbStorage implements FilmStorage {
             List<Film> recommendedFilms = jdbcTemplate.query(sqlGetRecommendations,
                     (rs, rowNum) -> makeFilm(rs), id, userId);
             if (!recommendedFilms.isEmpty()) {
-                recommendedFilms.forEach(film ->
-                        film.setGenres(filmGenreStorage.getFilmGenresByFilmId(film.getId())));
-                recommendedFilms.forEach(film ->
-                        film.setDirectors(filmDirectorStorage.getFilmDirectorByFilmId(film.getId())));
-                return recommendedFilms;
+                return addGenresAndDirectorsToFilms(recommendedFilms);
             }
         }
         return new ArrayList<>();
@@ -210,9 +207,7 @@ public class FilmDbStorage implements FilmStorage {
         }
         final List<Film> films = jdbcTemplate.query(sql.toString(), new Object[]{directorId},
                 new int[]{Types.INTEGER}, (rs, rowNum) -> makeFilm(rs));
-        films.forEach(film -> film.setGenres(filmGenreStorage.getFilmGenresByFilmId(film.getId())));
-        films.forEach(film -> film.setDirectors(filmDirectorStorage.getFilmDirectorByFilmId(film.getId())));
-        return films;
+        return addGenresAndDirectorsToFilms(films);
     }
 
     @Override
@@ -224,9 +219,7 @@ public class FilmDbStorage implements FilmStorage {
                 "SELECT l2.film_id FROM likes AS l2 WHERE l2.user_id=?) " +
                 "ORDER BY (SELECT count(*) FROM likes AS l WHERE l.film_id = f.id);";
         final List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), userId, friendId);
-        films.forEach(film -> film.setGenres(filmGenreStorage.getFilmGenresByFilmId(film.getId())));
-        films.forEach(film -> film.setDirectors(filmDirectorStorage.getFilmDirectorByFilmId(film.getId())));
-        return films;
+        return addGenresAndDirectorsToFilms(films);
     }
 
     @Override
@@ -237,6 +230,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    @Transactional
     public List<Film> getTopPopularFilms(Integer count, Integer genreId, Integer year) {
         String sql = "SELECT f.* FROM films AS f WHERE true %s %s " +
                 "ORDER BY (SELECT count(*) FROM likes AS l WHERE l.film_id = f.id) DESC " +
@@ -250,6 +244,40 @@ public class FilmDbStorage implements FilmStorage {
                 : "AND YEAR(f.release_date) = " + year;
         sql = String.format(sql, filterGenre, filterYear);
         final List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), count);
+        return addGenresAndDirectorsToFilms(films);
+    }
+
+    @Override
+    @Transactional
+    public List<Film> searchFilms(String query, Set<SearchType> searchTypes) {
+        if (query == null || query.isEmpty()) {
+            return new ArrayList<>();
+        }
+        String sql = "SELECT f.* FROM films AS f WHERE f.id IN (%s) " +
+                "ORDER BY (SELECT count(*) FROM likes AS l WHERE l.film_id = f.id) DESC;";
+        String searchByTitle = "SELECT f1.id FROM films AS f1 WHERE lower(f1.\"name\") LIKE :byTitle ";
+        String searchByDirector = "SELECT f2.id FROM films AS f2 " +
+                "LEFT JOIN film_director AS fd ON fd.film_id = f2.id " +
+                "LEFT JOIN directors AS d ON d.id = fd.director_id " +
+                "WHERE lower(d.\"name\") LIKE :byDirector ";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        final String preparedString = "%" + query.toLowerCase() + "%";
+        if (searchTypes.contains(DIRECTOR) && searchTypes.contains(TITLE)) {
+            sql = String.format(sql, searchByTitle + "UNION " + searchByDirector);
+            params.addValue("byTitle", preparedString);
+            params.addValue("byDirector", preparedString);
+        } else if (searchTypes.contains(DIRECTOR)) {
+            sql = String.format(sql, searchByDirector);
+            params.addValue("byDirector", preparedString);
+        } else {
+            sql = String.format(sql, searchByTitle);
+            params.addValue("byTitle", preparedString);
+        }
+        final List<Film> films = namedParameterJdbcTemplate.query(sql, params, (rs, rowNum) -> makeFilm(rs));
+        return addGenresAndDirectorsToFilms(films);
+    }
+
+    private List<Film> addGenresAndDirectorsToFilms(List<Film> films) {
         films.forEach(film -> film.setGenres(filmGenreStorage.getFilmGenresByFilmId(film.getId())));
         films.forEach(film -> film.setDirectors(filmDirectorStorage.getFilmDirectorByFilmId(film.getId())));
         return films;
