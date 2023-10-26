@@ -44,7 +44,8 @@ public class FilmController {
 
     @GetMapping("/popular")
     @ResponseStatus(HttpStatus.OK)
-    public List<Film> getTopPopularFilms(@RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
+    public List<Film> getTopPopularFilms(
+            @RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
         log.info("Запрос на получение {} популярных фильмов", count);
         final List<Film> topPopularFilms = filmService.getTopPopularFilms(count);
         log.info("Отправлен список из {} популярных фильмов", topPopularFilms.size());
@@ -95,5 +96,16 @@ public class FilmController {
         final List<Film> directorsFilms = filmService.getFilmsByDirectorId(directorId, sortBy);
         log.info("Количество фильмов режиссера с id: {} равно: {}", directorId, directorsFilms.size());
         return directorsFilms;
+    }
+
+    @GetMapping("/common")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> getCommonFilms(@RequestParam(value = "userId") Long userId,
+                                     @RequestParam(value = "friendId") Long friendId) {
+        log.info("Запрос на получение общих фильмов пользователей с userId: {} и friendId: {}", userId, friendId);
+        final List<Film> commonFilms = filmService.getCommonFilms(userId, friendId);
+        log.info("Количество фильмов пользователей с userId: {} и friendId: {} равно: {}",
+                userId, friendId, commonFilms.size());
+        return commonFilms;
     }
 }

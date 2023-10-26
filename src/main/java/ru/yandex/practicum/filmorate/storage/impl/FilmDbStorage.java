@@ -214,6 +214,19 @@ public class FilmDbStorage implements FilmStorage {
         return films;
     }
 
+    @Override
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        String sql = "SELECT f.* FROM films AS f WHERE f.id IN (" +
+                "SELECT l1.film_id FROM likes AS l1 WHERE l1.user_id=? " +
+                "INTERSECT " +
+                "SELECT l2.film_id FROM likes AS l2 WHERE l2.user_id=?) " +
+                "ORDER BY (SELECT count(*) FROM likes AS l WHERE l.film_id = f.id);";
+        final List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs), userId, friendId);
+        films.forEach(film -> film.setGenres(filmGenreStorage.getFilmGenresByFilmId(film.getId())));
+        films.forEach(film -> film.setDirectors(filmDirectorStorage.getFilmDirectorByFilmId(film.getId())));
+        return films;
+    }
+
 
     private Film makeFilm(ResultSet rs) throws SQLException {
         return Film.builder()
