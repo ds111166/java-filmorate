@@ -16,7 +16,7 @@
 
 ![filmorate - public](https://github.com/ds111166/ER-diagram-filmorate/blob/master/er-diagram-filmorate.png?raw=true)
 
-## add-search : Функциональность «Поиск». 3SP
+## **<span style="color:blue">_add-search : Функциональность «Поиск».<span>_**
 
 💡 Ветка для реализации задачи должна называться add-search.
 
